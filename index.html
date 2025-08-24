@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الكتابات الأسبوعية</title>
+    <title>منصة تقديم الكتابات الأسبوعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
@@ -100,7 +100,7 @@
                             name="student_id" 
                             required 
                             placeholder="مثال: أحمد محمد 12353 123456"
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                     </div>
 
@@ -112,7 +112,7 @@
                             id="weeklyTopic" 
                             name="weekly_topic" 
                             required
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                         >
                             <option value="">اختر الموضوع</option>
                             <option value="همزة الوصل والقطع">همزة الوصل والقطع</option>
@@ -145,7 +145,7 @@
                             rows="15" 
                             required
                             placeholder="ابدأ كتابة مقالك هنا... تأكد من التركيز على الموضوع المختار وكتابة محتوى واضح ومفيد."
-                            class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[300px] focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[300px] focus:outline-none focus:ring-2 focus:ring-gray-300"
                         ></textarea>
                         
                         <!-- Word Counter -->
@@ -161,7 +161,7 @@
                     <button 
                         type="submit" 
                         id="submitBtn"
-                        class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+                        class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300"
                     >
                         🚀 إرسال المقال للتقييم
                     </button>
@@ -323,6 +323,8 @@
         }
 
         function displayResults(data) {
+            console.log('Received data:', data); // Debug log
+            
             // Update rating
             document.getElementById('rating').textContent = 
                 data.gemini_rating ? `${data.gemini_rating}/10` : 'غير متوفر';
@@ -335,13 +337,13 @@
             document.getElementById('lexicalDensity').textContent = 
                 data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
             
-            // Update summary
-            document.getElementById('summary').textContent = 
-                data.feedback_summary || 'لا يوجد ملخص متاح';
+            // Update summary - try multiple possible field names
+            const summary = data.feedback_summary || data.feedbackSummary || data.summary || 'لا يوجد ملخص متاح';
+            document.getElementById('summary').textContent = summary;
             
-            // Update detailed feedback
-            document.getElementById('detailedFeedback').textContent = 
-                data.gemini_feedback || 'لا يوجد تقييم تفصيلي متاح';
+            // Update detailed feedback - try multiple possible field names
+            const feedback = data.gemini_feedback || data.geminiFeedback || data.feedback || 'لا يوجد تقييم تفصيلي متاح';
+            document.getElementById('detailedFeedback').textContent = feedback;
             
             // Show results with smooth scroll
             resultsContainer.classList.remove('hidden');
