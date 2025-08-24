@@ -19,12 +19,10 @@
         <form id="submission-form" class="space-y-4">
             <div>
                 <label for="studentId" class="block text-sm font-medium text-gray-700">الاسم والرقم الجامعي والشعبة</label>
-                <!-- تم تصحيح اسم الحقل ليطابق الـ webhook -->
                 <input type="text" id="studentId" name="student_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
             </div>
             <div>
                 <label for="weeklyTopic" class="block text-sm font-medium text-gray-700">موضوع الأسبوع</label>
-                <!-- تم تصحيح اسم الحقل ليطابق الـ webhook -->
                 <select id="weeklyTopic" name="weekly_topic" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
                     <option value="">اختر الموضوع</option>
                     <option value="همزة الوصل والقطع">همزة الوصل والقطع</option>
@@ -45,7 +43,6 @@
             </div>
             <div>
                 <label for="articleText" class="block text-sm font-medium text-gray-700">نص المقال (150-200 كلمة)</label>
-                <!-- تم تصحيح اسم الحقل ليطابق الـ webhook -->
                 <textarea id="articleText" name="article" rows="10" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2"></textarea>
                 <p id="wordCount" class="text-xs text-gray-500 mt-1 text-left">عدد الكلمات: 0</p>
             </div>
@@ -61,7 +58,6 @@
             <div id="feedbackOutput" class="bg-gray-50 rounded-md p-4 whitespace-pre-wrap text-sm text-gray-800 border border-gray-200"></div>
         </div>
     </div>
-
     <script>
         const form = document.getElementById('submission-form');
         const articleText = document.getElementById('articleText');
