@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة تقديم الكتابات الأسبوعية</title>
+    <title>الكتابات الأسبوعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
@@ -81,7 +81,7 @@
                 منصة تقديم الكتابات الأسبوعية
             </h1>
             <p class="text-white/90 text-lg">
-                اكتب مقالك واحصل على تقييم فوري من الذكاء الاصطناعي
+                اكتب مقالك واحصل على التقييم
             </p>
         </div>
 
@@ -254,7 +254,7 @@
             e.preventDefault();
 
             // Show loading state with animation
-            showStatus('🔄 يتم إرسال المقال والحصول على التقييم من الذكاء الاصطناعي...', 'loading');
+            showStatus('🔄 يتم إرسال المقال والحصول على التقييم...', 'loading');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ جاري المعالجة...';
             resultsContainer.classList.add('hidden');
