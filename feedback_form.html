@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة تقديم الكتابات الأسبوعية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6 my-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">تقديم الكتابة المتخصصة الأسبوعية</h1>
+        <form id="submission-form" class="space-y-4">
+            <div>
+                <label for="studentId" class="block text-sm font-medium text-gray-700">معرّف الطالب</label>
+                <input type="text" id="studentId" name="studentId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+            </div>
+            <div>
+                <label for="weeklyTopic" class="block text-sm font-medium text-gray-700">موضوع الأسبوع</label>
+                <select id="weeklyTopic" name="weeklyTopic" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                    <option value="">اختر الموضوع</option>
+                    <option value="همزة الوصل والقطع">همزة الوصل والقطع</option>
+                    <option value="الهمزات: وسط الكلمة وآخرها">الهمزات: وسط الكلمة وآخرها</option>
+                    <option value="تطوير الكتابة بصياغة عنوان جذاب">تطوير الكتابة بصياغة عنوان جذاب</option>
+                    <option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option>
+                    <option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option>
+                    <option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option>
+                    <option value="كتابة محتوى جذاب">كتابة محتوى جذاب</option>
+                    <option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option>
+                    <option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option>
+                    <option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option>
+                    <option value="كتابة محتوى متخصص: بريد إلكتروني">كتابة محتوى متخصص: بريد إلكتروني</option>
+                    <option value="كتابة محتوى متخصص: منشورات التواصل الاجتماعي">كتابة محتوى متخصص: منشورات التواصل الاجتماعي</option>
+                    <option value="كتابة محتوى متخصص: كتابة إبداعية">كتابة محتوى متخصص: كتابة إبداعية</option>
+                    <option value="كتابة محتوى متخصص: كتابة أكاديمية">كتابة محتوى متخصص: كتابة أكاديمية</option>
+                </select>
+            </div>
+            <div>
+                <label for="articleText" class="block text-sm font-medium text-gray-700">نص المقال (150-200 كلمة)</label>
+                <textarea id="articleText" name="articleText" rows="10" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2"></textarea>
+                <p id="wordCount" class="text-xs text-gray-500 mt-1 text-left">عدد الكلمات: 0</p>
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                إرسال المقال
+            </button>
+        </form>
+        <div id="statusMessage" class="mt-4 text-center hidden"></div>
+        <div id="feedbackContainer" class="mt-6 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">نتائج التقييم</h2>
+            <p id="geminiRating" class="text-lg font-bold text-center text-indigo-600 my-4"></p>
+            <p id="feedbackSummary" class="text-md text-center text-gray-700 mb-4"></p>
+            <div id="feedbackOutput" class="bg-gray-50 rounded-md p-4 whitespace-pre-wrap text-sm text-gray-800 border border-gray-200"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('submission-form');
+        const articleText = document.getElementById('articleText');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const statusMessage = document.getElementById('statusMessage');
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        const feedbackOutput = document.getElementById('feedbackOutput');
+        const geminiRatingDisplay = document.getElementById('geminiRating');
+        const feedbackSummaryDisplay = document.getElementById('feedbackSummary');
+        
+        const webhookUrl = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
+
+        articleText.addEventListener('input', () => {
+            const words = articleText.value.split(/\s+/).filter(word => word.length > 0);
+            wordCountDisplay.textContent = `عدد الكلمات: ${words.length}`;
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            statusMessage.classList.remove('hidden');
+            statusMessage.textContent = '... يتم إرسال المقال. الرجاء الانتظار ...';
+            statusMessage.style.color = 'gray';
+            feedbackContainer.classList.add('hidden');
+
+            const formData = new FormData(form);
+            const data = {
+                student_id: formData.get('studentId'),
+                weekly_topic: formData.get('weeklyTopic'),
+                article: formData.get('articleText')
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                statusMessage.textContent = 'تم استلام التقييم بنجاح!';
+                statusMessage.style.color = 'green';
+                feedbackContainer.classList.remove('hidden');
+                
+                geminiRatingDisplay.textContent = `التقييم: ${result.gemini_rating}/10`;
+                feedbackSummaryDisplay.textContent = result.feedback_summary;
+                
+                feedbackOutput.textContent = `
+النسبة بين الكلمات الفريدة والكلمات الكلية (Type-Token Ratio): ${result.typeTokenRatio}%
+الكثافة المعجمية (Lexical Density): ${result.lexicalDensity}%
+\n---\n
+${result.gemini_feedback}
+`;
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.textContent = 'حدث خطأ أثناء إرسال المقال. الرجاء المحاولة لاحقاً.';
+                statusMessage.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
