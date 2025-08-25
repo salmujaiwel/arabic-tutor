@@ -99,7 +99,7 @@
                             id="studentId" 
                             name="student_id" 
                             required 
-                            placeholder="447مثال: أحمد محمد 12353 123456"
+                            placeholder="مثال: أحمد محمد 12353 123456"
                             class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                     </div>
@@ -121,7 +121,7 @@
                             <option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option>
                             <option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option>
                             <option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option>
-                            <option value="كتابة محتوى جذاب">كتابة محتوى استهدافي</option>
+                            <option value="كتابة محتوى استهدافي">كتابة محتوى استهدافي</option>
                             <option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option>
                             <option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option>
                             <option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option>
@@ -262,7 +262,7 @@
             // Validate student ID (must contain name, section, and university number)
             const studentIdParts = studentId.trim().split(/\s+/);
             if (studentIdParts.length < 3) {
-                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 447123456)', 'error');
+                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 123456)', 'error');
                 return;
             }
 
