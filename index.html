@@ -92,7 +92,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="studentId" class="block text-lg font-semibold text-gray-800 mb-3">
-                            🎓 اسم الطالب والشعبة والرقم الجامعي
+                            اسم الطالب والشعبة والرقم الجامعي
                         </label>
                         <input 
                             type="text" 
@@ -106,7 +106,7 @@
 
                     <div>
                         <label for="weeklyTopic" class="block text-lg font-semibold text-gray-800 mb-3">
-                            📚 موضوع الأسبوع
+                            موضوع الأسبوع
                         </label>
                         <select 
                             id="weeklyTopic" 
@@ -121,7 +121,7 @@
                             <option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option>
                             <option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option>
                             <option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option>
-                            <option value="كتابة محتوى جذاب">كتابة محتوى جذاب</option>
+                            <option value="كتابة محتوى جذاب">كتابة محتوى مستهدفة</option>
                             <option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option>
                             <option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option>
                             <option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option>
@@ -136,7 +136,7 @@
                 <!-- Article Writing Section -->
                 <div>
                     <label for="article" class="block text-lg font-semibold text-gray-800 mb-3">
-                        ✍️ نص المقال (150-200 كلمة)
+                        نص المقال (150-200 كلمة)
                     </label>
                     <div class="relative">
                         <textarea 
@@ -163,7 +163,7 @@
                         id="submitBtn"
                         class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300"
                     >
-                        🚀 إرسال المقال للتقييم
+                        إرسال المقال للتقييم
                     </button>
                 </div>
             </form>
@@ -182,12 +182,12 @@
                 <!-- Metrics Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">⭐</div>
+                        <div class="text-2xl mb-2"></div>
                         <div class="text-sm text-gray-600 mb-2">التقييم العام</div>
                         <div id="rating" class="text-3xl font-bold text-gray-700">-/10</div>
                     </div>
                     <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📊</div>
+                        <div class="text-2xl mb-2"></div>
                         <div class="text-sm text-gray-600 mb-2">التنوع المعجمي</div>
                         <div id="lexicalDiversity" class="text-3xl font-bold text-gray-700">-%</div>
                     </div>
@@ -209,7 +209,7 @@
                 <!-- Detailed Feedback -->
                 <div class="bg-gray-100 rounded-xl p-6 border border-gray-200">
                     <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        📝 التقييم التفصيلي والنصائح
+                        التقييم التفصيلي والنصائح
                     </h3>
                     <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
                 </div>
@@ -262,14 +262,14 @@
             // Validate student ID (must contain name, section, and university number)
             const studentIdParts = studentId.trim().split(/\s+/);
             if (studentIdParts.length < 3) {
-                showStatus('❌ يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 123456)', 'error');
+                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 447123456)', 'error');
                 return;
             }
 
             // Show loading state with animation
-            showStatus('🔄 يتم إرسال المقال والحصول على التقييم...', 'loading');
+            showStatus('يتم إرسال المقال والحصول على التقييم...', 'loading');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ جاري المعالجة...';
+            submitBtn.innerHTML = 'تحت التقييم...';
             resultsContainer.classList.add('hidden');
 
             const data = {
@@ -294,14 +294,14 @@
                 const result = await response.json();
                 
                 // Show success message
-                showStatus('✅ تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
+                showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
                 
                 // Display results with animation
                 displayResults(result);
 
             } catch (error) {
                 console.error('Error:', error);
-                showStatus('❌ حدث خطأ أثناء إرسال المقال. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
+                showStatus('حدث خطأ أثناء إرسال المقال. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
             } finally {
                 // Reset button
                 submitBtn.disabled = false;
@@ -366,16 +366,16 @@
             let summary = 'تم استلام المقال وسيتم مراجعته';
             if (data.feedback_summary && data.feedback_summary !== '{{ $json.feedback_summary }}' && typeof data.feedback_summary === 'string') {
                 summary = data.feedback_summary;
-                console.log('✅ Using feedback_summary:', summary);
+                console.log('Using feedback_summary:', summary);
             } else if (data.feedbackSummary && data.feedbackSummary !== '{{ $json.feedbackSummary }}' && typeof data.feedbackSummary === 'string') {
                 summary = data.feedbackSummary;
-                console.log('✅ Using feedbackSummary:', summary);
+                console.log('Using feedbackSummary:', summary);
             } else if (data.summary && data.summary !== '{{ $json.summary }}' && typeof data.summary === 'string') {
                 summary = data.summary;
-                console.log('✅ Using summary:', summary);
+                console.log('Using summary:', summary);
             } else if (data.gemini_summary && data.gemini_summary !== '{{ $json.gemini_summary }}' && typeof data.gemini_summary === 'string') {
                 summary = data.gemini_summary;
-                console.log('✅ Using gemini_summary:', summary);
+                console.log('Using gemini_summary:', summary);
             } else {
                 console.log('⚠️ No valid summary found, using fallback');
             }
@@ -386,20 +386,20 @@
             let feedback = 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
             if (data.gemini_feedback && data.gemini_feedback !== '{{ $json.gemini_feedback }}' && typeof data.gemini_feedback === 'string') {
                 feedback = data.gemini_feedback;
-                console.log('✅ Using gemini_feedback:', feedback);
+                console.log('Using gemini_feedback:', feedback);
             } else if (data.geminiFeedback && data.geminiFeedback !== '{{ $json.geminiFeedback }}' && typeof data.geminiFeedback === 'string') {
                 feedback = data.geminiFeedback;
-                console.log('✅ Using geminiFeedback:', feedback);
+                console.log('Using geminiFeedback:', feedback);
             } else if (data.feedback && data.feedback !== '{{ $json.feedback }}' && typeof data.feedback === 'string') {
                 feedback = data.feedback;
-                console.log('✅ Using feedback:', feedback);
+                console.log('Using feedback:', feedback);
             } else if (data.detailed_feedback && data.detailed_feedback !== '{{ $json.detailed_feedback }}' && typeof data.detailed_feedback === 'string') {
                 feedback = data.detailed_feedback;
-                console.log('✅ Using detailed_feedback:', feedback);
+                console.log('Using detailed_feedback:', feedback);
             } else {
                 console.log('⚠️ No valid feedback found, using fallback');
             }
-            console.log('🔍 Final feedback to display:', feedback);
+            console.log('Final feedback to display:', feedback);
             document.getElementById('detailedFeedback').textContent = feedback;
             
             // Show results with smooth scroll
