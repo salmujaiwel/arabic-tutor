@@ -99,7 +99,7 @@
                             id="studentId" 
                             name="student_id" 
                             required 
-                            placeholder="مثال: أحمد محمد 12353 123456"
+                            placeholder="مثال: أحمد محمد 12353 447123456"
                             class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                         />
                     </div>
@@ -262,7 +262,19 @@
             // Validate student ID (must contain name, section, and university number)
             const studentIdParts = studentId.trim().split(/\s+/);
             if (studentIdParts.length < 3) {
-                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 123456)', 'error');
+                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال: أحمد محمد 12353 447123456)', 'error');
+                return;
+            }
+
+            // Count Arabic words specifically
+            const arabicText = article.replace(/[^\u0621-\u064A\u0660-\u0669\s]/g, '').trim();
+            const arabicWords = arabicText ? arabicText.split(/\s+/).filter(word => 
+                word.length > 0 && /[\u0621-\u064A]/.test(word)
+            ) : [];
+            
+            // Validate minimum word count (150 Arabic words)
+            if (arabicWords.length < 150) {
+                showStatus(`المقال يحتوي على ${arabicWords.length} كلمة عربية فقط. يجب أن يحتوي على 150 كلمة عربية على الأقل.`, 'error');
                 return;
             }
 
@@ -363,7 +375,7 @@
                 data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
             
             // Handle summary with extensive debugging
-            let summary = 'تم استلام المقال وسيتم مراجعته';
+            let summary = 'تم استلام المقال وستتم مراجعته';
             if (data.feedback_summary && data.feedback_summary !== '{{ $json.feedback_summary }}' && typeof data.feedback_summary === 'string') {
                 summary = data.feedback_summary;
                 console.log('Using feedback_summary:', summary);
