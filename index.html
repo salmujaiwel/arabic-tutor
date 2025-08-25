@@ -323,7 +323,21 @@
         }
 
         function displayResults(data) {
-            console.log('Received data:', data); // Debug log
+            console.log('🔍 FULL DEBUG - Received data:', data);
+            console.log('🔍 Data type:', typeof data);
+            console.log('🔍 Data keys:', Object.keys(data));
+            console.log('🔍 Summary field check:', data.feedback_summary);
+            console.log('🔍 Feedback field check:', data.gemini_feedback);
+            console.log('🔍 All possible summary fields:');
+            console.log('  - feedback_summary:', data.feedback_summary);
+            console.log('  - feedbackSummary:', data.feedbackSummary);
+            console.log('  - summary:', data.summary);
+            console.log('  - gemini_summary:', data.gemini_summary);
+            console.log('🔍 All possible feedback fields:');
+            console.log('  - gemini_feedback:', data.gemini_feedback);
+            console.log('  - geminiFeedback:', data.geminiFeedback);
+            console.log('  - feedback:', data.feedback);
+            console.log('  - detailed_feedback:', data.detailed_feedback);
             
             // Update rating
             document.getElementById('rating').textContent = 
@@ -337,12 +351,44 @@
             document.getElementById('lexicalDensity').textContent = 
                 data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
             
-            // Update summary - try multiple possible field names
-            const summary = data.feedback_summary || data.feedbackSummary || data.summary || 'لا يوجد ملخص متاح';
+            // Handle summary with extensive debugging
+            let summary = 'تم استلام المقال وسيتم مراجعته';
+            if (data.feedback_summary && data.feedback_summary !== '{{ $json.feedback_summary }}' && typeof data.feedback_summary === 'string') {
+                summary = data.feedback_summary;
+                console.log('✅ Using feedback_summary:', summary);
+            } else if (data.feedbackSummary && data.feedbackSummary !== '{{ $json.feedbackSummary }}' && typeof data.feedbackSummary === 'string') {
+                summary = data.feedbackSummary;
+                console.log('✅ Using feedbackSummary:', summary);
+            } else if (data.summary && data.summary !== '{{ $json.summary }}' && typeof data.summary === 'string') {
+                summary = data.summary;
+                console.log('✅ Using summary:', summary);
+            } else if (data.gemini_summary && data.gemini_summary !== '{{ $json.gemini_summary }}' && typeof data.gemini_summary === 'string') {
+                summary = data.gemini_summary;
+                console.log('✅ Using gemini_summary:', summary);
+            } else {
+                console.log('⚠️ No valid summary found, using fallback');
+            }
+            console.log('🔍 Final summary to display:', summary);
             document.getElementById('summary').textContent = summary;
             
-            // Update detailed feedback - try multiple possible field names
-            const feedback = data.gemini_feedback || data.geminiFeedback || data.feedback || 'لا يوجد تقييم تفصيلي متاح';
+            // Handle feedback with extensive debugging
+            let feedback = 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
+            if (data.gemini_feedback && data.gemini_feedback !== '{{ $json.gemini_feedback }}' && typeof data.gemini_feedback === 'string') {
+                feedback = data.gemini_feedback;
+                console.log('✅ Using gemini_feedback:', feedback);
+            } else if (data.geminiFeedback && data.geminiFeedback !== '{{ $json.geminiFeedback }}' && typeof data.geminiFeedback === 'string') {
+                feedback = data.geminiFeedback;
+                console.log('✅ Using geminiFeedback:', feedback);
+            } else if (data.feedback && data.feedback !== '{{ $json.feedback }}' && typeof data.feedback === 'string') {
+                feedback = data.feedback;
+                console.log('✅ Using feedback:', feedback);
+            } else if (data.detailed_feedback && data.detailed_feedback !== '{{ $json.detailed_feedback }}' && typeof data.detailed_feedback === 'string') {
+                feedback = data.detailed_feedback;
+                console.log('✅ Using detailed_feedback:', feedback);
+            } else {
+                console.log('⚠️ No valid feedback found, using fallback');
+            }
+            console.log('🔍 Final feedback to display:', feedback);
             document.getElementById('detailedFeedback').textContent = feedback;
             
             // Show results with smooth scroll
