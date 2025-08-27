@@ -1,482 +1,130 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الكتابات الأسبوعية</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Cairo', sans-serif;
-            direction: rtl;
-            background: #000000;
-            min-height: 100vh;
-        }
-        
-        .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-        
-        .input-field {
-            transition: all 0.3s ease;
-            border: 2px solid #e2e8f0;
-        }
-        
-        .input-field:focus {
-            border-color: #6b7280;
-            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(31, 41, 55, 0.3);
-        }
-        
-        .results-card {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            border: 1px solid #e5e7eb;
-            animation: slideUp 0.5s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .metric-card {
-            background: white;
-            transition: transform 0.3s ease;
-        }
-        
-        .metric-card:hover {
-            transform: scale(1.02);
-        }
-        
-        .word-counter {
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body class="min-h-screen py-8">
-    <div class="container mx-auto px-4 max-w-4xl">
-        <!-- Header -->
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-white mb-4 drop-shadow-lg">
-                تقديم الكتابات الأسبوعية
-            </h1>
-            <p class="text-white/90 text-lg">
-                اختر المهارة التي شُرحت في المحاضرة واكتب عن موضوع...
-            </p>
-        </div>
+// Parse Gemini API response AND build final webhook response
+const previousData = $('Code').all()[0].json; // Get data from first Code node
+const geminiResponse = $json; // Get HTTP response from Gemini
 
-        <!-- Main Form Container -->
-        <div class="form-container rounded-2xl p-8 mb-8">
-            <form id="submissionForm" class="space-y-8">
-                <!-- Student Info -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="studentId" class="block text-lg font-semibold text-gray-800 mb-3">
-                            اسم الطالب والشعبة والرقم الجامعي
-                        </label>
-                        <input 
-                            type="text" 
-                            id="studentId" 
-                            name="student_id" 
-                            required 
-                            placeholder="سلطان المجيول 12353 447123456"
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        />
-                    </div>
+console.log('🔍 Building final response...');
+console.log('🔍 Previous data keys:', Object.keys(previousData));
 
-                    <div>
-                        <label for="weeklyTopic" class="block text-lg font-semibold text-gray-800 mb-3">
-                            موضوع الأسبوع
-                        </label>
-                        <select 
-                            id="weeklyTopic" 
-                            name="weekly_topic" 
-                            required
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        >
-                            <option value="">اختر الموضوع</option>
-                            <option value="همزة الوصل والقطع">همزة الوصل والقطع</option>
-                            <option value="الهمزات: وسط الكلمة وآخرها">الهمزات: وسط الكلمة وآخرها</option>
-                            <option value="تطوير الكتابة بصياغة عنوان جذاب">تطوير الكتابة بصياغة عنوان جذاب</option>
-                            <option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option>
-                            <option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option>
-                            <option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option>
-                            <option value="كتابة محتوى استهدافي">كتابة محتوى استهدافي</option>
-                            <option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option>
-                            <option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option>
-                            <option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option>
-                            <option value="كتابة محتوى متخصص: بريد إلكتروني">كتابة محتوى متخصص: بريد إلكتروني</option>
-                            <option value="كتابة محتوى متخصص: منشورات التواصل الاجتماعي">كتابة محتوى متخصص: منشورات التواصل الاجتماعي</option>
-                            <option value="كتابة محتوى متخصص: كتابة إبداعية">كتابة محتوى متخصص: كتابة إبداعية</option>
-                            <option value="كتابة محتوى متخصص: كتابة أكاديمية">كتابة محتوى متخصص: كتابة أكاديمية</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Article Writing Section -->
-                <div>
-                    <label for="article" class="block text-lg font-semibold text-gray-800 mb-3">
-                        نص المقال (150-200 كلمة)
-                    </label>
-                    <div class="relative">
-                        <textarea 
-                            id="article" 
-                            name="article" 
-                            rows="15" 
-                            required
-                            placeholder="ابدأ كتابتك هنا (الحد الأدنى: 150 كلمة عربية)..."
-                            class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[300px] focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        ></textarea>
-                        
-                        <!-- Word Counter -->
-                        <div class="absolute bottom-4 left-4 bg-gray-100 px-3 py-1 rounded-full">
-                            <span class="text-sm">عدد الكلمات العربية: </span>
-                            <span id="wordCount" class="word-counter text-sm">0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="text-center">
-                    <button 
-                        type="submit" 
-                        id="submitBtn"
-                        class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300"
-                    >
-                        إرسال المقال للتقييم
-                    </button>
-                </div>
-            </form>
-
-            <!-- Status Messages -->
-            <div id="statusMessage" class="mt-8 p-6 rounded-xl hidden">
-                <div id="statusText" class="text-center font-semibold text-lg"></div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div id="resultsContainer" class="hidden">
-            <div class="results-card rounded-2xl p-8 text-gray-800">
-                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">نتائج التقييم</h2>
-                
-                <!-- Metrics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📈</div>
-                        <div class="text-sm text-gray-600 mb-2">التقييم العام</div>
-                        <div id="rating" class="text-3xl font-bold text-gray-700">-/10</div>
-                    </div>
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📈</div>
-                        <div class="text-sm text-gray-600 mb-2">التنوع المعجمي</div>
-                        <div id="lexicalDiversity" class="text-3xl font-bold text-gray-700">-%</div>
-                    </div>
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📈</div>
-                        <div class="text-sm text-gray-600 mb-2">الكثافة المعجمية</div>
-                        <div id="lexicalDensity" class="text-3xl font-bold text-gray-700">-%</div>
-                    </div>
-                </div>
-
-                <!-- Summary Section -->
-                <div class="bg-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
-                    <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        💬 ملخص التقييم
-                    </h3>
-                    <p id="summary" class="text-gray-700 text-lg leading-relaxed"></p>
-                </div>
-
-                <!-- Detailed Feedback -->
-                <div class="bg-gray-100 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        التقييم التفصيلي والنصائح
-                    </h3>
-                    <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Elements
-        const form = document.getElementById('submissionForm');
-        const articleTextarea = document.getElementById('article');
-        const wordCountSpan = document.getElementById('wordCount');
-        const submitBtn = document.getElementById('submitBtn');
-        const statusMessage = document.getElementById('statusMessage');
-        const statusText = document.getElementById('statusText');
-        const resultsContainer = document.getElementById('resultsContainer');
-
-        // Replace with your actual n8n webhook URL
-        const WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
-
-        // Enhanced Arabic word counting function
-        function countArabicWords(text) {
-            if (!text || typeof text !== 'string') return 0;
-            
-            // More precise Arabic word detection
-            const words = text
-                .trim()
-                .split(/\s+/)
-                .filter(word => {
-                    // Remove punctuation from word
-                    const cleanWord = word.replace(/[.,!?;:()""''«»\-\u060C\u061B\u061F]/g, '');
-                    // Check if word contains Arabic letters (main Arabic block)
-                    return cleanWord.length > 0 && /[\u0600-\u06FF]/.test(cleanWord);
-                });
-            
-            return words.length;
-        }
-
-        // Real-time Arabic word count with enhanced feedback
-        articleTextarea.addEventListener('input', function() {
-            const text = this.value.trim();
-            const arabicWords = countArabicWords(text);
-            wordCountSpan.textContent = arabicWords;
-            
-            // Enhanced visual feedback for Arabic word count
-            if (arabicWords < 150) {
-                wordCountSpan.className = 'word-counter text-sm text-amber-600';
-                wordCountSpan.parentElement.className = 'absolute bottom-4 left-4 bg-amber-50 px-3 py-1 rounded-full border border-amber-200';
-            } else if (arabicWords > 200) {
-                wordCountSpan.className = 'word-counter text-sm text-red-600';
-                wordCountSpan.parentElement.className = 'absolute bottom-4 left-4 bg-red-50 px-3 py-1 rounded-full border border-red-200';
-            } else {
-                wordCountSpan.className = 'word-counter text-sm text-green-600';
-                wordCountSpan.parentElement.className = 'absolute bottom-4 left-4 bg-green-50 px-3 py-1 rounded-full border border-green-200';
-            }
-        });
-
-        // Form submission with enhanced UX and validation
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Get form data
-            const formData = new FormData(form);
-            const studentId = formData.get('student_id');
-            const weeklyTopic = formData.get('weekly_topic');
-            const article = formData.get('article');
-
-            // Validate student ID (must contain name, section, and university number)
-            const studentIdParts = studentId.trim().split(/\s+/);
-            if (studentIdParts.length < 3) {
-                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال سلطان المجيول 12353 447123456)', 'error');
-                return;
-            }
-
-            // Count Arabic words using the same function
-            const arabicWordCount = countArabicWords(article);
-            
-            // STRICT validation - block submission if less than 150 Arabic words
-            if (arabicWordCount < 150) {
-                showStatus(`لا يمكن إرسال المقال. يحتوي على ${arabicWordCount} كلمة عربية فقط. الحد الأدنى المطلوب: 150 كلمة عربية.`, 'error');
-                articleTextarea.focus();
-                articleTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-
-            // Show loading state with animation
-            showStatus('🔄 يتم إرسال المقال والحصول على التقييم...', 'loading');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'تحت التقييم الأولي...';
-            resultsContainer.classList.add('hidden');
-
-            const data = {
-                student_id: studentId,
-                weekly_topic: weeklyTopic,
-                article: article
-            };
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                // Show success message
-                showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
-                
-                // Display results with animation
-                displayResults(result);
-
-            } catch (error) {
-                console.error('Error:', error);
-                showStatus('حدث خطأ أثناء إرسال المقال. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
-            } finally {
-                // Reset button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'إرسال المقال للتقييم';
-            }
-        });
-
-        function showStatus(message, type) {
-            statusText.textContent = message;
-            
-            let bgColor, textColor;
-            switch(type) {
-                case 'success':
-                    bgColor = 'bg-green-100 border border-green-300';
-                    textColor = 'text-green-800';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 border border-red-300';
-                    textColor = 'text-red-800';
-                    break;
-                case 'loading':
-                    bgColor = 'bg-gray-100 border border-gray-300';
-                    textColor = 'text-gray-800';
-                    break;
-            }
-            
-            statusMessage.className = `mt-8 p-6 rounded-xl ${bgColor}`;
-            statusText.className = `text-center font-semibold text-lg ${textColor}`;
-            statusMessage.classList.remove('hidden');
-        }
-
-        // Format feedback text with better bullets and structure
-        function formatFeedbackText(text) {
-            if (!text) return 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
-            
-            let formatted = text
-                // Convert basic bullets to HTML
-                .replace(/- /g, '• ')
-                .replace(/\* /g, '• ')
-                
-                // Format section headers
-                .replace(/^(التقييم:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
-                .replace(/^(الملخص:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
-                .replace(/^(الأخطاء الإملائية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
-                .replace(/^(الأخطاء النحوية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
-                .replace(/^(الكلمات المكررة:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-yellow-700">$1</div>')
-                .replace(/^(نصائح للتحسين:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-blue-700">$1</div>')
-                .replace(/^(تحليل مفصل:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-green-700">$1</div>')
-                
-                // Format bullet points with proper indentation
-                .replace(/^• ([^\n]+)/gm, '<div class="mr-4 mb-2">• $1</div>')
-                .replace(/^← ([^\n]+)/gm, '<div class="mr-6 mb-1 text-green-600">← $1</div>')
-                
-                // Format paragraphs
-                .replace(/\n\n/g, '</p><p class="mb-4">')
-                
-                // Wrap in paragraph tags
-                .replace(/^/, '<p class="mb-4">')
-                .replace(/$/, '</p>');
-            
-            return formatted;
-        }
-
-        function displayResults(data) {
-            console.log('🔍 FULL DEBUG - Received data:', data);
-            console.log('🔍 Data type:', typeof data);
-            console.log('🔍 Data keys:', Object.keys(data));
-            console.log('🔍 Summary field check:', data.feedback_summary);
-            console.log('🔍 Feedback field check:', data.gemini_feedback);
-            console.log('🔍 All possible summary fields:');
-            console.log('  - feedback_summary:', data.feedback_summary);
-            console.log('  - feedbackSummary:', data.feedbackSummary);
-            console.log('  - summary:', data.summary);
-            console.log('  - gemini_summary:', data.gemini_summary);
-            console.log('🔍 All possible feedback fields:');
-            console.log('  - gemini_feedback:', data.gemini_feedback);
-            console.log('  - geminiFeedback:', data.geminiFeedback);
-            console.log('  - feedback:', data.feedback);
-            console.log('  - detailed_feedback:', data.detailed_feedback);
-            
-            // Update rating
-            document.getElementById('rating').textContent = 
-                data.gemini_rating ? `${data.gemini_rating}/10` : 'غير متوفر';
-            
-            // Update lexical diversity
-            document.getElementById('lexicalDiversity').textContent = 
-                data.lexical_diversity ? `${parseFloat(data.lexical_diversity).toFixed(1)}%` : 'غير متوفر';
-            
-            // Update lexical density
-            document.getElementById('lexicalDensity').textContent = 
-                data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
-            
-            // Handle summary with extensive debugging
-            let summary = 'تم استلام المقال وسيتم مراجعته';
-            if (data.feedback_summary && data.feedback_summary !== '{{ $json.feedback_summary }}' && typeof data.feedback_summary === 'string') {
-                summary = data.feedback_summary;
-                console.log('Using feedback_summary:', summary);
-            } else if (data.feedbackSummary && data.feedbackSummary !== '{{ $json.feedbackSummary }}' && typeof data.feedbackSummary === 'string') {
-                summary = data.feedbackSummary;
-                console.log('Using feedbackSummary:', summary);
-            } else if (data.summary && data.summary !== '{{ $json.summary }}' && typeof data.summary === 'string') {
-                summary = data.summary;
-                console.log('Using summary:', summary);
-            } else if (data.gemini_summary && data.gemini_summary !== '{{ $json.gemini_summary }}' && typeof data.gemini_summary === 'string') {
-                summary = data.gemini_summary;
-                console.log('Using gemini_summary:', summary);
-            } else {
-                console.log('No valid summary found, using fallback');
-            }
-            console.log('🔍 Final summary to display:', summary);
-            document.getElementById('summary').textContent = summary;
-            
-            // Handle feedback with extensive debugging
-            let feedback = 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
-            if (data.gemini_feedback && data.gemini_feedback !== '{{ $json.gemini_feedback }}' && typeof data.gemini_feedback === 'string') {
-                feedback = data.gemini_feedback;
-                console.log('Using gemini_feedback:', feedback);
-            } else if (data.geminiFeedback && data.geminiFeedback !== '{{ $json.geminiFeedback }}' && typeof data.geminiFeedback === 'string') {
-                feedback = data.geminiFeedback;
-                console.log('Using geminiFeedback:', feedback);
-            } else if (data.feedback && data.feedback !== '{{ $json.feedback }}' && typeof data.feedback === 'string') {
-                feedback = data.feedback;
-                console.log('Using feedback:', feedback);
-            } else if (data.detailed_feedback && data.detailed_feedback !== '{{ $json.detailed_feedback }}' && typeof data.detailed_feedback === 'string') {
-                feedback = data.detailed_feedback;
-                console.log('Using detailed_feedback:', feedback);
-            } else {
-                console.log('No valid feedback found, using fallback');
-            }
-            console.log('🔍 Final feedback to display:', feedback);
-            
-            // Format feedback with better bullets and structure
-            const formattedFeedback = formatFeedbackText(feedback);
-            document.getElementById('detailedFeedback').innerHTML = formattedFeedback;
-            
-            // Show results with smooth scroll
-            resultsContainer.classList.remove('hidden');
-            
-            // Smooth scroll to results
-            setTimeout(() => {
-                resultsContainer.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 300);
-        }
-    </script>
-</body>
-</html>
+try {
+  // Parse Gemini response
+  if (!geminiResponse.candidates || !geminiResponse.candidates[0] || !geminiResponse.candidates[0].content) {
+    throw new Error('Invalid Gemini response structure');
+  }
+  
+  const feedback = geminiResponse.candidates[0].content.parts[0].text;
+  console.log('🔍 Generated feedback length:', feedback.length);
+  
+  // Extract rating with multiple pattern matching
+  let rating = 5;
+  const ratingPatterns = [
+    /\*\*التقييم:\*\*\s*(\d+(?:\.\d+)?)\s*\/\s*10/,
+    /التقييم:\s*(\d+(?:\.\d+)?)\s*\/\s*10/,
+    /(\d+(?:\.\d+)?)\s*\/\s*10/
+  ];
+  
+  for (const pattern of ratingPatterns) {
+    const match = feedback.match(pattern);
+    if (match) {
+      rating = parseFloat(match[1]);
+      console.log('🔍 Found rating:', rating);
+      break;
+    }
+  }
+  
+  // Extract summary with multiple pattern matching
+  let summary = 'تم استلام المقال وتقييمه بنجاح';
+  const summaryPatterns = [
+    /\*\*الملخص:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s,
+    /الملخص:\s*(.+?)(?:\n\n|\*\*|$)/s,
+    /\*\*ملخص التقييم:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s
+  ];
+  
+  for (const pattern of summaryPatterns) {
+    const match = feedback.match(pattern);
+    if (match) {
+      summary = match[1].trim();
+      console.log('🔍 Found summary:', summary.substring(0, 100) + '...');
+      break;
+    }
+  }
+  
+  // If no summary found, extract first meaningful sentence
+  if (summary === 'تم استلام المقال وتقييمه بنجاح') {
+    const lines = feedback.split('\n').filter(line => 
+      line.trim().length > 15 && 
+      !line.includes('**التقييم:**') &&
+      !line.includes('التقييم:') &&
+      !line.includes('تحذيرات') &&
+      !line.includes('المطلوب')
+    );
+    if (lines.length > 0) {
+      summary = lines[0].replace(/^\*\*.*?\*\*\s*/, '').trim();
+    }
+  }
+  
+  // Clean up formatting by removing ** markers
+  const cleanedFeedback = feedback.replace(/\*\*/g, '');
+  const cleanedSummary = summary.replace(/\*\*/g, '');
+  
+  // Build the EXACT response the HTML form expects with new fields
+  const finalResponse = {
+    // Original fields
+    student_id: previousData.student_id,
+    weekly_topic: previousData.weekly_topic,
+    article: previousData.article,
+    type_token_ratio: previousData.type_token_ratio,
+    lexical_diversity: previousData.lexical_diversity,
+    lexical_density: previousData.lexical_density,
+    gemini_rating: rating,
+    feedback_summary: cleanedSummary,
+    gemini_feedback: cleanedFeedback,
+    created_at: previousData.created_at,
+    
+    // New fields for title and structure
+    title: previousData.title || 'بدون عنوان',
+    paragraph_count: previousData.paragraph_count || 0,
+    structure_valid: previousData.structure_valid || false,
+    structure_note: previousData.structure_note || 'غير محدد',
+    
+    // Additional metadata
+    word_count: previousData.word_count || 0,
+    skill_focus: previousData.skill_focus || previousData.weekly_topic,
+    evaluation_ready: true
+  };
+  
+  console.log('🔍 Final response built successfully');
+  console.log('🔍 Response includes title:', !!finalResponse.title);
+  console.log('🔍 Response includes structure info:', !!finalResponse.structure_note);
+  
+  return finalResponse;
+  
+} catch (error) {
+  console.error('🔍 Parsing error:', error);
+  console.error('🔍 Error stack:', error.stack);
+  
+  // Return enhanced error response with all fields
+  return {
+    // Original fields
+    student_id: previousData.student_id,
+    weekly_topic: previousData.weekly_topic,
+    article: previousData.article,
+    type_token_ratio: previousData.type_token_ratio || 0,
+    lexical_diversity: previousData.lexical_diversity || 0,
+    lexical_density: previousData.lexical_density || 0,
+    gemini_rating: 5,
+    feedback_summary: 'حدث خطأ في معالجة التقييم',
+    gemini_feedback: `تم استلام مقالك "${previousData.title || 'بدون عنوان'}" حول "${previousData.weekly_topic}" ولكن حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.`,
+    created_at: previousData.created_at,
+    
+    // New fields with defaults
+    title: previousData.title || 'بدون عنوان',
+    paragraph_count: previousData.paragraph_count || 0,
+    structure_valid: false,
+    structure_note: 'حدث خطأ في تحليل الهيكل',
+    word_count: previousData.word_count || 0,
+    skill_focus: previousData.skill_focus || previousData.weekly_topic,
+    evaluation_ready: false,
+    error_occurred: true,
+    error_message: error.message
+  };
+}
