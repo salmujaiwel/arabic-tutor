@@ -199,11 +199,8 @@
                             rows="18" 
                             required
                             placeholder="اكتب مقالك هنا مقسماً إلى ثلاث فقرات:
-
 الفقرة الأولى - المقدمة: تمهيد للموضوع وتعريف به...
-
 الفقرة الثانية - العرض: تطوير الأفكار والتفاصيل...
-
 الفقرة الثالثة - الخاتمة: تلخيص واستنتاج..."
                             class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[400px] focus:outline-none focus:ring-2 focus:ring-gray-300"
                         ></textarea>
@@ -324,13 +321,13 @@
             return words.length;
         }
 
-        // Enhanced paragraph counting function
+        // Enhanced paragraph counting function - UPDATED FOR SINGLE LINE BREAKS
         function countParagraphs(text) {
             if (!text || typeof text !== 'string') return 0;
             
-            // Split by double line breaks or sentence endings followed by line breaks
+            // Split by single line breaks
             const paragraphs = text
-                .split(/\n\s*\n|\.\s*\n|\?\s*\n|\!\s*\n/)
+                .split(/\n/)
                 .map(p => p.trim())
                 .filter(p => p.length > 20); // Only count substantial paragraphs
             
