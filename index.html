@@ -1,555 +1,1 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الكتابات الأسبوعية</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Cairo', sans-serif;
-            direction: rtl;
-            background: #000000;
-            min-height: 100vh;
-        }
-        
-        .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-        
-        .input-field {
-            transition: all 0.3s ease;
-            border: 2px solid #e2e8f0;
-        }
-        
-        .input-field:focus {
-            border-color: #6b7280;
-            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(31, 41, 55, 0.3);
-        }
-        
-        .results-card {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            border: 1px solid #e5e7eb;
-            animation: slideUp 0.5s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .metric-card {
-            background: white;
-            transition: transform 0.3s ease;
-        }
-        
-        .metric-card:hover {
-            transform: scale(1.02);
-        }
-        
-        .word-counter {
-            font-weight: 600;
-        }
-        
-        .structure-guide {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border: 1px solid #93c5fd;
-        }
-        
-        .paragraph-counter {
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body class="min-h-screen py-8">
-    <div class="container mx-auto px-4 max-w-4xl">
-        <!-- Header -->
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-white mb-4 drop-shadow-lg">
-                تقديم الكتابات الأسبوعية
-            </h1>
-            <p class="text-white/90 text-lg">
-                اختر المهارة التي شُرحت في المحاضرة واكتب عن...
-            </p>
-        </div>
-
-        <!-- Structure Guidelines -->
-        <div class="structure-guide rounded-2xl p-6 mb-8 text-gray-800">
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-                إرشادات الكتابة
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="font-semibold text-lg mb-2">متطلبات العنوان</h3>
-                    <ul class="text-sm space-y-1">
-                        <li>• عنوان جذاب ومناسب للمحتوى</li>
-                        <li>• يعبر عن الموضوع بوضوح</li>
-                        <li>• يثير اهتمام القارئ</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg mb-2">هيكل المقال المطلوب</h3>
-                    <ul class="text-sm space-y-1">
-                        <li>• <strong>المقدمة:</strong> تمهيد وتعريف بالموضوع</li>
-                        <li>• <strong>العرض:</strong> تطوير الأفكار والتفاصيل</li>
-                        <li>• <strong>الخاتمة:</strong> تلخيص واستنتاج</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Form Container -->
-        <div class="form-container rounded-2xl p-8 mb-8">
-            <form id="submissionForm" class="space-y-8">
-                <!-- Student Info -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="studentId" class="block text-lg font-semibold text-gray-800 mb-3">
-                            اسم الطالب والشعبة والرقم الجامعي
-                        </label>
-                        <input 
-                            type="text" 
-                            id="studentId" 
-                            name="student_id" 
-                            required 
-                            placeholder="سلطان المجيول 12353 447123456"
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        />
-                    </div>
-
-                    <div>
-                        <label for="weeklyTopic" class="block text-lg font-semibold text-gray-800 mb-3">
-                            موضوع الأسبوع
-                        </label>
-                        <select 
-                            id="weeklyTopic" 
-                            name="weekly_topic" 
-                            required
-                            class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        >
-                            <option value="">اختر الموضوع</option>
-                            <option value="همزة الوصل والقطع">همزة الوصل والقطع</option>
-                            <option value="الهمزات: وسط الكلمة وآخرها">الهمزات: وسط الكلمة وآخرها</option>
-                            <option value="تطوير الكتابة بصياغة عنوان جذاب">تطوير الكتابة بصياغة عنوان جذاب</option>
-                            <option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option>
-                            <option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option>
-                            <option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option>
-                            <option value="كتابة محتوى استهدافي">كتابة محتوى استهدافي</option>
-                            <option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option>
-                            <option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option>
-                            <option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option>
-                            <option value="كتابة محتوى متخصص: بريد إلكتروني">كتابة محتوى متخصص: بريد إلكتروني</option>
-                            <option value="كتابة محتوى متخصص: منشورات التواصل الاجتماعي">كتابة محتوى متخصص: منشورات التواصل الاجتماعي</option>
-                            <option value="كتابة محتوى متخصص: كتابة إبداعية">كتابة محتوى متخصص: كتابة إبداعية</option>
-                            <option value="كتابة محتوى متخصص: كتابة أكاديمية">كتابة محتوى متخصص: كتابة أكاديمية</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Title Section -->
-                <div>
-                    <label for="title" class="block text-lg font-semibold text-gray-800 mb-3">
-                        عنوان المقال
-                    </label>
-                    <input 
-                        type="text" 
-                        id="title" 
-                        name="title" 
-                        required 
-                        placeholder="اكتب عنواناً جذاباً ومعبراً عن موضوع مقالك"
-                        class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        minlength="5"
-                        maxlength="100"
-                    />
-                    <div class="mt-2 text-sm text-gray-600">
-                        💡 تنبيه: اجعل العنوان واضحاً وجذاباً ويعبر عن محتوى مقالك
-                    </div>
-                </div>
-
-                <!-- Article Writing Section -->
-                <div>
-                    <label for="article" class="block text-lg font-semibold text-gray-800 mb-3">
-                        نص المقال (150-200 كلمة - 3 فقرات مطلوبة)
-                    </label>
-                    <div class="relative">
-                        <textarea 
-                            id="article" 
-                            name="article" 
-                            rows="18" 
-                            required
-                            placeholder="اكتب مقالك هنا مقسماً إلى ثلاث فقرات:
-الفقرة الأولى - المقدمة: تمهيد للموضوع وتعريف به...
-الفقرة الثانية - العرض: تطوير الأفكار والتفاصيل...
-الفقرة الثالثة - الخاتمة: تلخيص واستنتاج..."
-                            class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[400px] focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        ></textarea>
-                        
-                        <!-- Counters -->
-                        <div class="absolute bottom-4 left-4 space-y-2">
-                            <div class="bg-gray-100 px-3 py-1 rounded-full">
-                                <span class="text-sm">عدد الكلمات العربية: </span>
-                                <span id="wordCount" class="word-counter text-sm">0</span>
-                            </div>
-                            <div class="bg-blue-100 px-3 py-1 rounded-full">
-                                <span class="text-sm">عدد الفقرات: </span>
-                                <span id="paragraphCount" class="paragraph-counter text-sm">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-sm text-gray-600">
-                        📋 <strong>تذكير:</strong> يجب أن يحتوي المقال على ثلاث فقرات منفصلة: مقدمة وعرض وخاتمة
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="text-center">
-                    <button 
-                        type="submit" 
-                        id="submitBtn"
-                        class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300"
-                    >
-                        إرسال المقال للتقييم
-                    </button>
-                </div>
-            </form>
-
-            <!-- Status Messages -->
-            <div id="statusMessage" class="mt-8 p-6 rounded-xl hidden">
-                <div id="statusText" class="text-center font-semibold text-lg"></div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div id="resultsContainer" class="hidden">
-            <div class="results-card rounded-2xl p-8 text-gray-800">
-                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">نتائج التقييم</h2>
-                
-                <!-- Metrics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📊</div>
-                        <div class="text-sm text-gray-600 mb-2">التقييم العام</div>
-                        <div id="rating" class="text-3xl font-bold text-gray-700">-/10</div>
-                    </div>
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📊</div>
-                        <div class="text-sm text-gray-600 mb-2">التنوع المعجمي</div>
-                        <div id="lexicalDiversity" class="text-3xl font-bold text-gray-700">-%</div>
-                    </div>
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📈</div>
-                        <div class="text-sm text-gray-600 mb-2">الكثافة المعجمية</div>
-                        <div id="lexicalDensity" class="text-3xl font-bold text-gray-700">-%</div>
-                    </div>
-                    <div class="metric-card p-6 rounded-xl text-center shadow-lg">
-                        <div class="text-2xl mb-2">📈</div>
-                        <div class="text-sm text-gray-600 mb-2">عدد الفقرات</div>
-                        <div id="structureCount" class="text-3xl font-bold text-gray-700">-</div>
-                    </div>
-                </div>
-
-                <!-- Summary Section -->
-                <div class="bg-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
-                    <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        💬 ملخص التقييم
-                    </h3>
-                    <p id="summary" class="text-gray-700 text-lg leading-relaxed"></p>
-                </div>
-
-                <!-- Detailed Feedback -->
-                <div class="bg-gray-100 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        التقييم التفصيلي والنصائح
-                    </h3>
-                    <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Elements
-        const form = document.getElementById('submissionForm');
-        const titleInput = document.getElementById('title');
-        const articleTextarea = document.getElementById('article');
-        const wordCountSpan = document.getElementById('wordCount');
-        const paragraphCountSpan = document.getElementById('paragraphCount');
-        const submitBtn = document.getElementById('submitBtn');
-        const statusMessage = document.getElementById('statusMessage');
-        const statusText = document.getElementById('statusText');
-        const resultsContainer = document.getElementById('resultsContainer');
-
-        // Replace with your actual n8n webhook URL
-        const WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
-
-        // Enhanced Arabic word counting function
-        function countArabicWords(text) {
-            if (!text || typeof text !== 'string') return 0;
-            
-            // More precise Arabic word detection
-            const words = text
-                .trim()
-                .split(/\s+/)
-                .filter(word => {
-                    // Remove punctuation from word
-                    const cleanWord = word.replace(/[.,!?;:()""''«»\-\u060C\u061B\u061F]/g, '');
-                    // Check if word contains Arabic letters (main Arabic block)
-                    return cleanWord.length > 0 && /[\u0600-\u06FF]/.test(cleanWord);
-                });
-            
-            return words.length;
-        }
-
-        // Enhanced paragraph counting function - UPDATED FOR SINGLE LINE BREAKS
-        function countParagraphs(text) {
-            if (!text || typeof text !== 'string') return 0;
-            
-            // Split by single line breaks
-            const paragraphs = text
-                .split(/\n/)
-                .map(p => p.trim())
-                .filter(p => p.length > 20); // Only count substantial paragraphs
-            
-            return paragraphs.length;
-        }
-
-        // Real-time counting with enhanced feedback
-        function updateCounts() {
-            const text = articleTextarea.value.trim();
-            const arabicWords = countArabicWords(text);
-            const paragraphs = countParagraphs(text);
-            
-            wordCountSpan.textContent = arabicWords;
-            paragraphCountSpan.textContent = paragraphs;
-            
-            // Enhanced visual feedback for Arabic word count
-            if (arabicWords < 150) {
-                wordCountSpan.className = 'word-counter text-sm text-amber-600';
-                wordCountSpan.parentElement.className = 'bg-amber-50 px-3 py-1 rounded-full border border-amber-200';
-            } else if (arabicWords > 200) {
-                wordCountSpan.className = 'word-counter text-sm text-red-600';
-                wordCountSpan.parentElement.className = 'bg-red-50 px-3 py-1 rounded-full border border-red-200';
-            } else {
-                wordCountSpan.className = 'word-counter text-sm text-green-600';
-                wordCountSpan.parentElement.className = 'bg-green-50 px-3 py-1 rounded-full border border-green-200';
-            }
-
-            // Visual feedback for paragraph count
-            if (paragraphs < 3) {
-                paragraphCountSpan.className = 'paragraph-counter text-sm text-red-600';
-                paragraphCountSpan.parentElement.className = 'bg-red-50 px-3 py-1 rounded-full border border-red-200';
-            } else if (paragraphs === 3) {
-                paragraphCountSpan.className = 'paragraph-counter text-sm text-green-600';
-                paragraphCountSpan.parentElement.className = 'bg-green-50 px-3 py-1 rounded-full border border-green-200';
-            } else {
-                paragraphCountSpan.className = 'paragraph-counter text-sm text-blue-600';
-                paragraphCountSpan.parentElement.className = 'bg-blue-50 px-3 py-1 rounded-full border border-blue-200';
-            }
-        }
-
-        articleTextarea.addEventListener('input', updateCounts);
-
-        // Form submission with enhanced validation
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Get form data
-            const formData = new FormData(form);
-            const studentId = formData.get('student_id');
-            const weeklyTopic = formData.get('weekly_topic');
-            const title = formData.get('title');
-            const article = formData.get('article');
-
-            // Validate student ID
-            const studentIdParts = studentId.trim().split(/\s+/);
-            if (studentIdParts.length < 3) {
-                showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال سلطان المجيول 12353 447123456)', 'error');
-                return;
-            }
-
-            // Validate title
-            if (!title.trim() || title.trim().length < 5) {
-                showStatus('يجب إدخال عنوان للمقال (الحد الأدنى: 5 أحرف)', 'error');
-                titleInput.focus();
-                return;
-            }
-
-            // Count Arabic words and paragraphs
-            const arabicWordCount = countArabicWords(article);
-            const paragraphCount = countParagraphs(article);
-            
-            // Validate word count
-            if (arabicWordCount < 150) {
-                showStatus(`لا يمكن إرسال المقال. يحتوي على ${arabicWordCount} كلمة عربية فقط. الحد الأدنى المطلوب: 150 كلمة عربية.`, 'error');
-                articleTextarea.focus();
-                return;
-            }
-
-            // Validate paragraph structure
-            if (paragraphCount < 3) {
-                showStatus(`تحذير: المقال يحتوي على ${paragraphCount} فقرات فقط. يُنصح بوجود 3 فقرات (مقدمة، عرض، خاتمة). هل تريد المتابعة؟`, 'warning');
-                
-                if (!confirm('المقال لا يحتوي على 3 فقرات منفصلة. هل تريد إرساله للتقييم رغم ذلك؟')) {
-                    articleTextarea.focus();
-                    return;
-                }
-            }
-
-            // Show loading state
-            showStatus('🔄 يتم إرسال المقال والحصول على التقييم...', 'loading');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'تحت التقييم...';
-            resultsContainer.classList.add('hidden');
-
-            const data = {
-                student_id: studentId,
-                weekly_topic: weeklyTopic,
-                title: title,
-                article: article
-            };
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
-                displayResults(result);
-
-            } catch (error) {
-                console.error('Error:', error);
-                showStatus('حدث خطأ أثناء إرسال المقال. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'إرسال المقال للتقييم';
-            }
-        });
-
-        function showStatus(message, type) {
-            statusText.textContent = message;
-            
-            let bgColor, textColor;
-            switch(type) {
-                case 'success':
-                    bgColor = 'bg-green-100 border border-green-300';
-                    textColor = 'text-green-800';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 border border-red-300';
-                    textColor = 'text-red-800';
-                    break;
-                case 'warning':
-                    bgColor = 'bg-yellow-100 border border-yellow-300';
-                    textColor = 'text-yellow-800';
-                    break;
-                case 'loading':
-                    bgColor = 'bg-gray-100 border border-gray-300';
-                    textColor = 'text-gray-800';
-                    break;
-            }
-            
-            statusMessage.className = `mt-8 p-6 rounded-xl ${bgColor}`;
-            statusText.className = `text-center font-semibold text-lg ${textColor}`;
-            statusMessage.classList.remove('hidden');
-        }
-
-        // Enhanced feedback formatting
-        function formatFeedbackText(text) {
-            if (!text) return 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
-            
-            let formatted = text
-                .replace(/- /g, '• ')
-                .replace(/\* /g, '• ')
-                .replace(/^(التقييم:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
-                .replace(/^(الملخص:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
-                .replace(/^(تقييم العنوان:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-blue-700">$1</div>')
-                .replace(/^(تقييم هيكل المقال:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-green-700">$1</div>')
-                .replace(/^(الأخطاء الإملائية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
-                .replace(/^(الأخطاء النحوية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
-                .replace(/^(نصائح للتحسين:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-blue-700">$1</div>')
-                .replace(/^• ([^\n]+)/gm, '<div class="mr-4 mb-2">• $1</div>')
-                .replace(/\n\n/g, '</p><p class="mb-4">')
-                .replace(/^/, '<p class="mb-4">')
-                .replace(/$/, '</p>');
-            
-            return formatted;
-        }
-
-        function displayResults(data) {
-            console.log('🔍 Received data:', data);
-            
-            // Update all metrics
-            document.getElementById('rating').textContent = 
-                data.gemini_rating ? `${data.gemini_rating}/10` : 'غير متوفر';
-            
-            document.getElementById('lexicalDiversity').textContent = 
-                data.lexical_diversity ? `${parseFloat(data.lexical_diversity).toFixed(1)}%` : 'غير متوفر';
-            
-            document.getElementById('lexicalDensity').textContent = 
-                data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
-                
-            document.getElementById('structureCount').textContent = 
-                data.paragraph_count ? data.paragraph_count : 'غير متوفر';
-            
-            // Handle summary
-            let summary = 'تم استلام المقال وسيتم مراجعته';
-            if (data.feedback_summary && typeof data.feedback_summary === 'string') {
-                summary = data.feedback_summary;
-            }
-            document.getElementById('summary').textContent = summary;
-            
-            // Handle feedback
-            let feedback = 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
-            if (data.gemini_feedback && typeof data.gemini_feedback === 'string') {
-                feedback = data.gemini_feedback;
-            }
-            
-            const formattedFeedback = formatFeedbackText(feedback);
-            document.getElementById('detailedFeedback').innerHTML = formattedFeedback;
-            
-            // Show results
-            resultsContainer.classList.remove('hidden');
-            setTimeout(() => {
-                resultsContainer.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 300);
-        }
-
-        // Initialize counters
-        updateCounts();
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>الكتابات الأسبوعية</title><script src="https://cdn.tailwindcss.com"></script><style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');body{font-family:'Cairo',sans-serif;direction:rtl;background:#000000;min-height:100vh}.form-container{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);box-shadow:0 20px 40px rgba(0,0,0,0.1)}.input-field{transition:all 0.3s ease;border:2px solid #e2e8f0}.input-field:focus{border-color:#6b7280;box-shadow:0 0 0 3px rgba(107,114,128,0.1);transform:translateY(-1px)}.btn-primary{background:linear-gradient(135deg,#1f2937 0%,#111827 100%);transition:all 0.3s ease}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(31,41,55,0.3)}.results-card{background:linear-gradient(135deg,#f9fafb 0%,#f3f4f6 100%);border:1px solid #e5e7eb;animation:slideUp 0.5s ease-out}@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.metric-card{background:white;transition:transform 0.3s ease}.metric-card:hover{transform:scale(1.02)}.word-counter{font-weight:600}.structure-guide{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1px solid #93c5fd}.paragraph-counter{font-weight:600}</style></head><body class="min-h-screen py-8"><div class="container mx-auto px-4 max-w-4xl"><div class="text-center mb-10"><h1 class="text-4xl font-bold text-white mb-4 drop-shadow-lg">تقديم الكتابات الأسبوعية</h1><p class="text-white/90 text-lg">اختر المهارة التي شُرحت في المحاضرة واكتب عن...</p></div><div class="structure-guide rounded-2xl p-6 mb-8 text-gray-800"><h2 class="text-2xl font-bold mb-4 flex items-center">إرشادات الكتابة</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="font-semibold text-lg mb-2">متطلبات العنوان</h3><ul class="text-sm space-y-1"><li>• عنوان جذاب ومناسب للمحتوى</li><li>• يعبر عن الموضوع بوضوح</li><li>• يثير اهتمام القارئ</li></ul></div><div><h3 class="font-semibold text-lg mb-2">هيكل المقال المطلوب</h3><ul class="text-sm space-y-1"><li>• <strong>المقدمة:</strong> تمهيد وتعريف بالموضوع</li><li>• <strong>العرض:</strong> تطوير الأفكار والتفاصيل</li><li>• <strong>الخاتمة:</strong> تلخيص واستنتاج</li></ul></div></div></div><div class="form-container rounded-2xl p-8 mb-8"><form id="submissionForm" class="space-y-8"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label for="studentId" class="block text-lg font-semibold text-gray-800 mb-3">اسم الطالب والشعبة والرقم الجامعي</label><input type="text" id="studentId" name="student_id" required placeholder="سلطان المجيول 12353 447123456" class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"/></div><div><label for="weeklyTopic" class="block text-lg font-semibold text-gray-800 mb-3">موضوع الأسبوع</label><select id="weeklyTopic" name="weekly_topic" required class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300"><option value="">اختر الموضوع</option><option value="همزة الوصل والقطع">همزة الوصل والقطع</option><option value="الهمزات: وسط الكلمة وآخرها">الهمزات: وسط الكلمة وآخرها</option><option value="تطوير الكتابة بصياغة عنوان جذاب">تطوير الكتابة بصياغة عنوان جذاب</option><option value="صياغة العنوان والمقدمة">صياغة العنوان والمقدمة</option><option value="استراتيجيات التكثيف المعجمي">استراتيجيات التكثيف المعجمي</option><option value="استراتيجيات التكثيف التركيبي">استراتيجيات التكثيف التركيبي</option><option value="كتابة محتوى استهدافي">كتابة محتوى استهدافي</option><option value="كتابة محتوى متخصص: اختيار المصطلحات">كتابة محتوى متخصص: اختيار المصطلحات</option><option value="كتابة محتوى متخصص: تقرير">كتابة محتوى متخصص: تقرير</option><option value="كتابة محتوى متخصص: خطاب إداري">كتابة محتوى متخصص: خطاب إداري</option><option value="كتابة محتوى متخصص: بريد إلكتروني">كتابة محتوى متخصص: بريد إلكتروني</option><option value="كتابة محتوى متخصص: منشورات التواصل الاجتماعي">كتابة محتوى متخصص: منشورات التواصل الاجتماعي</option><option value="كتابة محتوى متخصص: كتابة إبداعية">كتابة محتوى متخصص: كتابة إبداعية</option><option value="كتابة محتوى متخصص: كتابة أكاديمية">كتابة محتوى متخصص: كتابة أكاديمية</option></select></div></div><div><label for="title" class="block text-lg font-semibold text-gray-800 mb-3">عنوان المقال</label><input type="text" id="title" name="title" required placeholder="اكتب عنواناً جذاباً ومعبراً عن موضوع مقالك" class="input-field w-full px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gray-300" minlength="5" maxlength="100"/><div class="mt-2 text-sm text-gray-600">💡 تنبيه: اجعل العنوان واضحاً وجذاباً ويعبر عن محتوى مقالك</div></div><div><label for="article" class="block text-lg font-semibold text-gray-800 mb-3">نص المقال (150-200 كلمة - 3 فقرات مطلوبة)</label><div class="relative"><textarea id="article" name="article" rows="18" required placeholder="اكتب مقالك هنا مقسماً إلى ثلاث فقرات:&#10;الفقرة الأولى - المقدمة: تمهيد للموضوع وتعريف به...&#10;الفقرة الثانية - العرض: تطوير الأفكار والتفاصيل...&#10;الفقرة الثالثة - الخاتمة: تلخيص واستنتاج..." class="input-field w-full px-4 py-4 rounded-xl text-lg leading-relaxed resize-y min-h-[400px] focus:outline-none focus:ring-2 focus:ring-gray-300"></textarea><div class="absolute bottom-4 left-4 space-y-2"><div class="bg-gray-100 px-3 py-1 rounded-full"><span class="text-sm">عدد الكلمات العربية: </span><span id="wordCount" class="word-counter text-sm">0</span></div><div class="bg-blue-100 px-3 py-1 rounded-full"><span class="text-sm">عدد الفقرات: </span><span id="paragraphCount" class="paragraph-counter text-sm">0</span></div></div></div><div class="mt-3 text-sm text-gray-600">📋 <strong>تذكير:</strong> يجب أن يحتوي المقال على ثلاث فقرات منفصلة: مقدمة وعرض وخاتمة</div></div><div class="text-center"><button type="submit" id="submitBtn" class="btn-primary text-white py-4 px-12 rounded-xl text-xl font-semibold shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300">إرسال المقال للتقييم</button></div></form><div id="statusMessage" class="mt-8 p-6 rounded-xl hidden"><div id="statusText" class="text-center font-semibold text-lg"></div></div></div><div id="resultsContainer" class="hidden"><div class="results-card rounded-2xl p-8 text-gray-800"><h2 class="text-3xl font-bold text-center mb-8 text-gray-800">نتائج التقييم</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"><div class="metric-card p-6 rounded-xl text-center shadow-lg"><div class="text-2xl mb-2">📊</div><div class="text-sm text-gray-600 mb-2">التقييم العام</div><div id="rating" class="text-3xl font-bold text-gray-700">-/10</div></div><div class="metric-card p-6 rounded-xl text-center shadow-lg"><div class="text-2xl mb-2">📊</div><div class="text-sm text-gray-600 mb-2">التنوع المعجمي</div><div id="lexicalDiversity" class="text-3xl font-bold text-gray-700">-%</div></div><div class="metric-card p-6 rounded-xl text-center shadow-lg"><div class="text-2xl mb-2">📈</div><div class="text-sm text-gray-600 mb-2">الكثافة المعجمية</div><div id="lexicalDensity" class="text-3xl font-bold text-gray-700">-%</div></div><div class="metric-card p-6 rounded-xl text-center shadow-lg"><div class="text-2xl mb-2">📈</div><div class="text-sm text-gray-600 mb-2">عدد الفقرات</div><div id="structureCount" class="text-3xl font-bold text-gray-700">-</div></div></div><div class="bg-gray-100 rounded-xl p-6 mb-6 border border-gray-200"><h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">💬 ملخص التقييم</h3><p id="summary" class="text-gray-700 text-lg leading-relaxed"></p></div><div class="bg-gray-100 rounded-xl p-6 border border-gray-200"><h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">التقييم التفصيلي والنصائح</h3><div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div></div></div></div></div><script>const form=document.getElementById('submissionForm');const titleInput=document.getElementById('title');const articleTextarea=document.getElementById('article');const wordCountSpan=document.getElementById('wordCount');const paragraphCountSpan=document.getElementById('paragraphCount');const submitBtn=document.getElementById('submitBtn');const statusMessage=document.getElementById('statusMessage');const statusText=document.getElementById('statusText');const resultsContainer=document.getElementById('resultsContainer');const WEBHOOK_URL='https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';function countArabicWords(text){if(!text||typeof text!=='string')return 0;const words=text.trim().split(/\s+/).filter(word=>{const cleanWord=word.replace(/[.,!?;:()""''«»\-\u060C\u061B\u061F]/g,'');return cleanWord.length>0&&/[\u0600-\u06FF]/.test(cleanWord);});return words.length;}function countParagraphs(text){if(!text||typeof text!=='string')return 0;const paragraphs=text.split(/\n/).map(p=>p.trim()).filter(p=>p.length>20);return paragraphs.length;}function updateCounts(){const text=articleTextarea.value.trim();const arabicWords=countArabicWords(text);const paragraphs=countParagraphs(text);wordCountSpan.textContent=arabicWords;paragraphCountSpan.textContent=paragraphs;if(arabicWords<150){wordCountSpan.className='word-counter text-sm text-amber-600';wordCountSpan.parentElement.className='bg-amber-50 px-3 py-1 rounded-full border border-amber-200';}else if(arabicWords>200){wordCountSpan.className='word-counter text-sm text-red-600';wordCountSpan.parentElement.className='bg-red-50 px-3 py-1 rounded-full border border-red-200';}else{wordCountSpan.className='word-counter text-sm text-green-600';wordCountSpan.parentElement.className='bg-green-50 px-3 py-1 rounded-full border border-green-200';}if(paragraphs<3){paragraphCountSpan.className='paragraph-counter text-sm text-red-600';paragraphCountSpan.parentElement.className='bg-red-50 px-3 py-1 rounded-full border border-red-200';}else if(paragraphs===3){paragraphCountSpan.className='paragraph-counter text-sm text-green-600';paragraphCountSpan.parentElement.className='bg-green-50 px-3 py-1 rounded-full border border-green-200';}else{paragraphCountSpan.className='paragraph-counter text-sm text-blue-600';paragraphCountSpan.parentElement.className='bg-blue-50 px-3 py-1 rounded-full border border-blue-200';}}articleTextarea.addEventListener('input',updateCounts);form.addEventListener('submit',async function(e){e.preventDefault();const formData=new FormData(form);const studentId=formData.get('student_id');const weeklyTopic=formData.get('weekly_topic');const title=formData.get('title');const article=formData.get('article');const studentIdParts=studentId.trim().split(/\s+/);if(studentIdParts.length<3){showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال سلطان المجيول 12353 447123456)','error');return;}if(!title.trim()||title.trim().length<5){showStatus('يجب إدخال عنوان للمقال (الحد الأدنى: 5 أحرف)','error');titleInput.focus();return;}const arabicWordCount=countArabicWords(article);const paragraphCount=countParagraphs(article);if(arabicWordCount<150){showStatus(`لا يمكن إرسال المقال. يحتوي على ${arabicWordCount} كلمة عربية فقط. الحد الأدنى المطلوب: 150 كلمة عربية.`,'error');articleTextarea.focus();return;}if(paragraphCount<3){showStatus(`تحذير: المقال يحتوي على ${paragraphCount} فقرات فقط. يُنصح بوجود 3 فقرات (مقدمة، عرض، خاتمة). هل تريد المتابعة؟`,'warning');if(!confirm('المقال لا يحتوي على 3 فقرات منفصلة. هل تريد إرساله للتقييم رغم ذلك؟')){articleTextarea.focus();return;}}showStatus('🔄 يتم إرسال المقال والحصول على التقييم...','loading');submitBtn.disabled=true;submitBtn.innerHTML='تحت التقييم...';resultsContainer.classList.add('hidden');const data={student_id:studentId,weekly_topic:weeklyTopic,title:title,article:article};try{const response=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!response.ok){throw new Error(`HTTP error! status: ${response.status}`);}const result=await response.json();showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه','success');displayResults(result);}catch(error){console.error('Error:',error);showStatus('حدث خطأ أثناء إرسال المقال. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.','error');}finally{submitBtn.disabled=false;submitBtn.innerHTML='إرسال المقال للتقييم';}});function showStatus(message,type){statusText.textContent=message;let bgColor,textColor;switch(type){case 'success':bgColor='bg-green-100 border border-green-300';textColor='text-green-800';break;case 'error':bgColor='bg-red-100 border border-red-300';textColor='text-red-800';break;case 'warning':bgColor='bg-yellow-100 border border-yellow-300';textColor='text-yellow-800';break;case 'loading':bgColor='bg-gray-100 border border-gray-300';textColor='text-gray-800';break;}statusMessage.className=`mt-8 p-6 rounded-xl ${bgColor}`;statusText.className=`text-center font-semibold text-lg ${textColor}`;statusMessage.classList.remove('hidden');}function formatFeedbackText(text){if(!text)return 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';let formatted=text.replace(/- /g,'• ').replace(/\* /g,'• ').replace(/^(التقييم:[^\n]*)/gm,'<div class="font-bold text-lg mb-3 text-gray-800">$1</div>').replace(/^(الملخص:[^\n]*)/gm,'<div class="font-bold text-lg mb-3 text-gray-800">$1</div>').replace(/^(تقييم العنوان:[^\n]*)/gm,'<div class="font-semibold text-base mb-2 text-blue-700">$1</div>').replace(/^(تقييم هيكل المقال:[^\n]*)/gm,'<div class="font-semibold text-base mb-2 text-green-700">$1</div>').replace(/^(الأخطاء الإملائية:[^\n]*)/gm,'<div class="font-semibold text-base mb-2 text-red-700">$1</div>').replace(/^(الأخطاء النحوية:[^\n]*)/gm,'<div class="font-semibold text-base mb-2 text-red-700">$1</div>').replace(/^(نصائح للتحسين:[^\n]*)/gm,'<div class="font-semibold text-base mb-2 text-blue-700">$1</div>').replace(/^• ([^\n]+)/gm,'<div class="mr-4 mb-2">• $1</div>').replace(/\n\n/g,'</p><p class="mb-4">').replace(/^/,'<p class="mb-4">').replace(/$/,'</p>');return formatted;}function displayResults(data){console.log('🔍 Received data:',data);document.getElementById('rating').textContent=data.gemini_rating?`${data.gemini_rating}/10`:'غير متوفر';document.getElementById('lexicalDiversity').textContent=data.lexical_diversity?`${parseFloat(data.lexical_diversity).toFixed(1)}%`:'غير متوفر';document.getElementById('lexicalDensity').textContent=data.lexical_density?`${parseFloat(data.lexical_density).toFixed(1)}%`:'غير متوفر';document.getElementById('structureCount').textContent=data.paragraph_count?data.paragraph_count:'غير متوفر';let summary='تم استلام المقال وسيتم مراجعته';if(data.feedback_summary&&typeof data.feedback_summary==='string'){summary=data.feedback_summary;}document.getElementById('summary').textContent=summary;let feedback='شكراً لإرسال مقالك. سيتم مراجعته قريباً.';if(data.gemini_feedback&&typeof data.gemini_feedback==='string'){feedback=data.gemini_feedback;}const formattedFeedback=formatFeedbackText(feedback);document.getElementById('detailedFeedback').innerHTML=formattedFeedback;resultsContainer.classList.remove('hidden');setTimeout(()=>{resultsContainer.scrollIntoView({behavior:'smooth',block:'start'});},300);}updateCounts();</script></body></html>
