@@ -391,7 +391,7 @@
             
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js';
+                script.src = 'https://cdn.jsdelivr.net/npm/docx@8.2.2/build/index.js'; // Using a recent stable version
                 script.onload = () => {
                     docxLibraryLoaded = true;
                     resolve();
@@ -405,10 +405,10 @@
         function replacePunctuations(text) {
             if (!text || typeof text !== 'string') return '';
             return text
-                .replace(/\./g, '۔')
-                .replace(/,/g, '،')
-                .replace(/\?/g, '؟')
-                .replace(/;/g, '؛');
+                .replace(/\s*\.\s*/g, '۔ ')
+                .replace(/\s*,\s*/g, '، ')
+                .replace(/\s*\?\s*/g, '؟ ')
+                .replace(/\s*;\s*/g, '؛ ');
         }
 
         // THE ONLY DOWNLOAD FUNCTION - Creates ONE file with both essay and report
@@ -434,15 +434,19 @@
             }
         }
         
-        // **UPDATED FUNCTION**
-        // Create combined DOCX document with robust RTL, punctuation, and single spacing
+        // **ULTIMATE FIX FUNCTION**
+        // Create combined DOCX with robust RTL, punctuation, and single spacing
         async function createCombinedDocument() {
-            const { Document, Packer, Paragraph, TextRun, AlignmentType, convertInchesToTwip } = docx;
+            const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
             
-            const ARABIC_FONT = "Times New Roman";
+            const ARABIC_FONT = "Arial"; // Arial is safer for compatibility
 
-            // Function to create paragraphs, applying all formatting rules
+            // Universal function to create paragraphs, applying all formatting rules
             const createFormattedParagraph = (text, options = {}) => {
+                // Return an empty paragraph if text is just whitespace
+                if (!text || text.trim() === '') {
+                    return new Paragraph({ spacing: { after: 120 }}); // Represents an empty line
+                }
                 const cleanText = replacePunctuations(text);
                 return new Paragraph({
                     children: [new TextRun({ 
@@ -478,7 +482,7 @@
                         createFormattedParagraph(currentSubmissionData.title, { size: 26, bold: true, alignment: AlignmentType.CENTER, after: 300 }),
                         
                         // Article content paragraphs
-                        ...currentSubmissionData.article.split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p)),
+                        ...currentSubmissionData.article.split('\n').map(p => createFormattedParagraph(p)),
 
                         // --- The Evaluation Report ---
                         createFormattedParagraph("تقرير التقييم", { size: 28, bold: true, alignment: AlignmentType.RIGHT, before: 400, after: 200 }),
@@ -488,10 +492,10 @@
                         createFormattedParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, size: 22, alignment: AlignmentType.RIGHT, after: 200 }),
                         
                         createFormattedParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, after: 100 }),
-                        ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p, { size: 22 })),
+                        ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').map(p => createFormattedParagraph(p, { size: 22 })),
                         
                         createFormattedParagraph("التقييم التفصيلي:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, before: 200, after: 100 }),
-                        ... (currentResultData.gemini_feedback || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p, { size: 22 })),
+                        ... (currentResultData.gemini_feedback || 'غير متوفر').split('\n').map(p => createFormattedParagraph(p, { size: 22 })),
                     ],
                 }],
             });
