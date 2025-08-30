@@ -550,6 +550,47 @@ ${currentResultData.gemini_feedback}`;
         async function downloadReportDocx() {
             if (!currentResultData || !currentSubmissionData) return;
             
+            // Parse the feedback to organize it properly
+            const feedback = currentResultData.gemini_feedback || '';
+            const sections = {
+                rating: '',
+                summary: '',
+                titleEval: '',
+                structureEval: '',
+                skillAnalysis: '',
+                skillErrors: '',
+                otherErrors: '',
+                suggestions: ''
+            };
+            
+            // Extract sections from feedback
+            const lines = feedback.split('\n');
+            let currentSection = '';
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.includes('التقييم:')) {
+                    currentSection = 'rating';
+                    sections.rating = trimmed;
+                } else if (trimmed.includes('الملخص:')) {
+                    currentSection = 'summary';
+                } else if (trimmed.includes('تقييم العنوان:')) {
+                    currentSection = 'titleEval';
+                } else if (trimmed.includes('تقييم هيكل المقال:')) {
+                    currentSection = 'structureEval';
+                } else if (trimmed.includes('تحليل المهارة اللغوية')) {
+                    currentSection = 'skillAnalysis';
+                } else if (trimmed.includes('الأخطاء المتعلقة')) {
+                    currentSection = 'skillErrors';
+                } else if (trimmed.includes('أخطاء لغوية أخرى:')) {
+                    currentSection = 'otherErrors';
+                } else if (trimmed.includes('نصائح للتحسين:')) {
+                    currentSection = 'suggestions';
+                } else if (trimmed && currentSection) {
+                    sections[currentSection] += '\n' + trimmed;
+                }
+            });
+            
             const doc = new docx.Document({
                 sections: [{
                     properties: {
@@ -561,7 +602,6 @@ ${currentResultData.gemini_feedback}`;
                                 left: 720,
                             },
                         },
-                        textDirection: docx.TextDirection.RIGHT_TO_LEFT,
                     },
                     children: [
                         // Main Title
@@ -572,7 +612,6 @@ ${currentResultData.gemini_feedback}`;
                                     bold: true,
                                     size: 32,
                                     color: "1f2937",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
@@ -600,7 +639,6 @@ ${currentResultData.gemini_feedback}`;
                                     bold: true,
                                     size: 24,
                                     color: "1e40af",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -613,12 +651,10 @@ ${currentResultData.gemini_feedback}`;
                                     text: "الطالب: ",
                                     bold: true,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                                 new docx.TextRun({
                                     text: currentSubmissionData.student_id,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -631,12 +667,10 @@ ${currentResultData.gemini_feedback}`;
                                     text: "عنوان المقال: ",
                                     bold: true,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                                 new docx.TextRun({
                                     text: currentSubmissionData.title,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -649,12 +683,10 @@ ${currentResultData.gemini_feedback}`;
                                     text: "موضوع الأسبوع: ",
                                     bold: true,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                                 new docx.TextRun({
                                     text: currentSubmissionData.weekly_topic,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -667,12 +699,10 @@ ${currentResultData.gemini_feedback}`;
                                     text: "تاريخ التقييم: ",
                                     bold: true,
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                                 new docx.TextRun({
                                     text: new Date().toLocaleDateString('ar-SA'),
                                     size: 22,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -687,7 +717,6 @@ ${currentResultData.gemini_feedback}`;
                                     bold: true,
                                     size: 24,
                                     color: "16a34a",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -702,7 +731,6 @@ ${currentResultData.gemini_feedback}`;
                                     size: 20,
                                     bold: true,
                                     color: "dc2626",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -714,7 +742,6 @@ ${currentResultData.gemini_feedback}`;
                                 new docx.TextRun({
                                     text: `• عدد الكلمات العربية: ${currentResultData.word_count}`,
                                     size: 20,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -726,7 +753,6 @@ ${currentResultData.gemini_feedback}`;
                                 new docx.TextRun({
                                     text: `• عدد الفقرات: ${currentResultData.paragraph_count}`,
                                     size: 20,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -738,7 +764,6 @@ ${currentResultData.gemini_feedback}`;
                                 new docx.TextRun({
                                     text: `• التنوع المعجمي: ${currentResultData.lexical_diversity}%`,
                                     size: 20,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -750,7 +775,6 @@ ${currentResultData.gemini_feedback}`;
                                 new docx.TextRun({
                                     text: `• الكثافة المعجمية: ${currentResultData.lexical_density}%`,
                                     size: 20,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -765,7 +789,6 @@ ${currentResultData.gemini_feedback}`;
                                     bold: true,
                                     size: 24,
                                     color: "7c3aed",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -778,7 +801,6 @@ ${currentResultData.gemini_feedback}`;
                                     text: currentSubmissionData.article,
                                     size: 20,
                                     italics: true,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -798,7 +820,6 @@ ${currentResultData.gemini_feedback}`;
                                     bold: true,
                                     size: 24,
                                     color: "ea580c",
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -808,9 +829,8 @@ ${currentResultData.gemini_feedback}`;
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: currentResultData.feedback_summary,
+                                    text: currentResultData.feedback_summary || sections.summary.trim(),
                                     size: 20,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -820,35 +840,161 @@ ${currentResultData.gemini_feedback}`;
                             },
                         }),
                         
-                        // Detailed Feedback Section
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "التقييم التفصيلي والنصائح",
-                                    bold: true,
-                                    size: 24,
-                                    color: "be185d",
-                                    rightToLeft: true,
-                                }),
-                            ],
-                            alignment: docx.AlignmentType.RIGHT,
-                            spacing: { after: 200 },
-                        }),
+                        // Title Evaluation Section
+                        ...(sections.titleEval ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: "تقييم العنوان",
+                                        bold: true,
+                                        size: 22,
+                                        color: "1e40af",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.titleEval.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
                         
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: currentResultData.gemini_feedback,
-                                    size: 20,
-                                    rightToLeft: true,
-                                }),
-                            ],
-                            alignment: docx.AlignmentType.RIGHT,
-                            spacing: { 
-                                after: 300,
-                                line: 360,
-                            },
-                        }),
+                        // Structure Evaluation Section
+                        ...(sections.structureEval ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: "تقييم هيكل المقال",
+                                        bold: true,
+                                        size: 22,
+                                        color: "16a34a",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.structureEval.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
+                        
+                        // Skill Analysis Section
+                        ...(sections.skillAnalysis ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `تحليل المهارة اللغوية "${currentSubmissionData.weekly_topic}"`,
+                                        bold: true,
+                                        size: 22,
+                                        color: "7c3aed",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.skillAnalysis.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
+                        
+                        // Skill Errors Section
+                        ...(sections.skillErrors ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `الأخطاء المتعلقة بـ "${currentSubmissionData.weekly_topic}"`,
+                                        bold: true,
+                                        size: 22,
+                                        color: "dc2626",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.skillErrors.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
+                        
+                        // Other Errors Section
+                        ...(sections.otherErrors ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: "أخطاء لغوية أخرى",
+                                        bold: true,
+                                        size: 22,
+                                        color: "dc2626",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.otherErrors.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
+                        
+                        // Suggestions Section
+                        ...(sections.suggestions ? [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: "نصائح للتحسين",
+                                        bold: true,
+                                        size: 22,
+                                        color: "059669",
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 150 },
+                            }),
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: sections.suggestions.trim(),
+                                        size: 20,
+                                    }),
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 300 },
+                            })
+                        ] : []),
                         
                         // Footer
                         new docx.Paragraph({
@@ -870,7 +1016,6 @@ ${currentResultData.gemini_feedback}`;
                                     size: 16,
                                     color: "6b7280",
                                     italics: true,
-                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
