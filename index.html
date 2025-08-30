@@ -400,6 +400,16 @@
                 document.head.appendChild(script);
             });
         }
+        
+        // **NEW FUNCTION** to handle Arabic punctuations
+        function replacePunctuations(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text
+                .replace(/\./g, '۔')
+                .replace(/,/g, '،')
+                .replace(/\?/g, '؟')
+                .replace(/;/g, '؛');
+        }
 
         // THE ONLY DOWNLOAD FUNCTION - Creates ONE file with both essay and report
         async function downloadSingleFile() {
@@ -425,89 +435,63 @@
         }
         
         // **UPDATED FUNCTION**
-        // Create combined DOCX document with improved RTL and justification support
+        // Create combined DOCX document with robust RTL, punctuation, and single spacing
         async function createCombinedDocument() {
-            const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
+            const { Document, Packer, Paragraph, TextRun, AlignmentType, convertInchesToTwip } = docx;
             
-            // Helper function to create a justified, RTL paragraph
-            const createArabicParagraph = (textValue, options = {}) => {
+            const ARABIC_FONT = "Times New Roman";
+
+            // Function to create paragraphs, applying all formatting rules
+            const createFormattedParagraph = (text, options = {}) => {
+                const cleanText = replacePunctuations(text);
                 return new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: textValue,
-                            size: options.size || 24, // Default size 12pt (24 half-points)
-                            bold: options.bold || false,
-                            font: "Arial", 
-                        }),
-                    ],
-                    alignment: options.alignment || AlignmentType.JUSTIFY, // Default to Justify
-                    bidirectional: true, // ESSENTIAL for Arabic
-                    spacing: options.spacing || { line: 360 }, // REMOVED default 'after' spacing to reduce space between paragraphs
+                    children: [new TextRun({ 
+                        text: cleanText, 
+                        size: options.size || 24, // 12pt
+                        bold: options.bold || false,
+                        font: ARABIC_FONT, 
+                        rightToLeft: true 
+                    })],
+                    alignment: options.alignment || AlignmentType.JUSTIFY,
+                    bidirectional: true,
+                    spacing: { 
+                        line: 240, // Single line spacing (1.0)
+                        before: options.before || 0,
+                        after: options.after || 0,
+                    },
                 });
             };
 
             const doc = new Document({
                 sections: [{
                     properties: {
-                        rightToLeft: true, // ADDED: Sets the entire document direction to RTL
-                        page: {
-                            margin: { top: 720, right: 720, bottom: 720, left: 720 },
-                        },
+                        rightToLeft: true,
                     },
                     children: [
                         // --- Header and Student Info ---
-                        new Paragraph({
-                            children: [new TextRun({ text: "المقال وتقرير التقييم", bold: true, size: 32, font: "Arial" })],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 },
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ text: `الطالب: ${currentSubmissionData.student_id}`, size: 24, font: "Arial" })],
-                            alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
-                            spacing: { after: 100 },
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ text: `الموضوع: ${currentSubmissionData.weekly_topic}`, size: 24, font: "Arial" })],
-                            alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
-                            spacing: { after: 400 },
-                        }),
+                        createFormattedParagraph("المقال وتقرير التقييم", { size: 32, bold: true, alignment: AlignmentType.CENTER, after: 400 }),
+                        createFormattedParagraph(`الطالب: ${currentSubmissionData.student_id}`, { size: 24, alignment: AlignmentType.RIGHT, after: 100 }),
+                        createFormattedParagraph(`الموضوع: ${currentSubmissionData.weekly_topic}`, { size: 24, alignment: AlignmentType.RIGHT, after: 400 }),
 
                         // --- The Student's Article ---
-                        new Paragraph({
-                            children: [new TextRun({ text: "المقال الأصلي", bold: true, size: 28, font: "Arial" })],
-                            alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
-                            spacing: { after: 200 },
-                        }),
-                        new Paragraph({ // The article's title
-                            children: [new TextRun({ text: currentSubmissionData.title, bold: true, size: 26, font: "Arial" })],
-                            alignment: AlignmentType.CENTER,
-                            bidirectional: true,
-                            spacing: { after: 300 },
-                        }),
+                        createFormattedParagraph("المقال الأصلي", { size: 28, bold: true, alignment: AlignmentType.RIGHT, after: 200 }),
+                        createFormattedParagraph(currentSubmissionData.title, { size: 26, bold: true, alignment: AlignmentType.CENTER, after: 300 }),
                         
-                        // The article content with justification and RTL, preserving paragraphs
-                        ...currentSubmissionData.article.split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p)),
+                        // Article content paragraphs
+                        ...currentSubmissionData.article.split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p)),
 
                         // --- The Evaluation Report ---
-                        new Paragraph({
-                            children: [new TextRun({ text: "تقرير التقييم", bold: true, size: 28, font: "Arial" })],
-                            alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
-                            spacing: { before: 400, after: 200 },
-                        }),
+                        createFormattedParagraph("تقرير التقييم", { size: 28, bold: true, alignment: AlignmentType.RIGHT, before: 400, after: 200 }),
                         
-                        // Summary and Feedback paragraphs are now also justified and RTL
-                        createArabicParagraph(`التقييم العام: ${currentResultData.gemini_rating}/10`, { bold: true, alignment: AlignmentType.RIGHT, size: 22, spacing: { after: 50 } }),
-                        createArabicParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, alignment: AlignmentType.RIGHT, size: 22, spacing: { after: 200 } }),
+                        // Report details
+                        createFormattedParagraph(`التقييم العام: ${currentResultData.gemini_rating}/10`, { bold: true, size: 22, alignment: AlignmentType.RIGHT, after: 50 }),
+                        createFormattedParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, size: 22, alignment: AlignmentType.RIGHT, after: 200 }),
                         
-                        createArabicParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, spacing: { after: 100 } }),
-                        ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p, { size: 22 })),
+                        createFormattedParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, after: 100 }),
+                        ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p, { size: 22 })),
                         
-                        createArabicParagraph("التقييم التفصيلي:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 100 } }),
-                        ... (currentResultData.gemini_feedback || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p, { size: 22 })),
+                        createFormattedParagraph("التقييم التفصيلي:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, before: 200, after: 100 }),
+                        ... (currentResultData.gemini_feedback || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createFormattedParagraph(p, { size: 22 })),
                     ],
                 }],
             });
