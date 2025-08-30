@@ -285,7 +285,7 @@
                     <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
                 </div>
 
-                <!-- Download Button -->
+                <!-- Download Button - THE ONLY ONE -->
                 <div class="text-center mt-6">
                     <button 
                         id="downloadBtn" 
@@ -342,7 +342,7 @@
             const paragraphs = text
                 .split(/\n/)
                 .map(p => p.trim())
-                .filter(p => p.length > 20); // A paragraph should have a reasonable length
+                .filter(p => p.length > 20);
             
             return paragraphs.length;
         }
@@ -404,7 +404,7 @@
         // THE ONLY DOWNLOAD FUNCTION - Creates ONE file with both essay and report
         async function downloadSingleFile() {
             if (!currentSubmissionData || !currentResultData) {
-                showStatus('لا توجد بيانات للتحميل. تأكد من إرسال المقال أولاً.', 'error');
+                alert('لا توجد بيانات للتحميل. تأكد من إرسال المقال أولاً.');
                 return;
             }
 
@@ -423,90 +423,206 @@
                 downloadBtn.textContent = 'تحميل المقال والتقرير';
             }
         }
-        
-        // **UPDATED FUNCTION**
-        // Create combined DOCX document with improved RTL and justification support
+
+        // Create combined DOCX document with improved RTL support
         async function createCombinedDocument() {
             const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
             
-            // Helper function to create a justified, RTL paragraph
-            const createArabicParagraph = (textValue, options = {}) => {
-                return new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: textValue,
-                            size: options.size || 24, // Default size 12pt (24 half-points)
-                            bold: options.bold || false,
-                            font: "Arial", 
-                        }),
-                    ],
-                    alignment: options.alignment || AlignmentType.JUSTIFY, // Default to Justify
-                    bidirectional: true, // ESSENTIAL for Arabic
-                    spacing: options.spacing || { after: 200, line: 360 }, // Default spacing
-                });
-            };
-
             const doc = new Document({
                 sections: [{
                     properties: {
                         page: {
-                            margin: { top: 720, right: 720, bottom: 720, left: 720 },
+                            margin: {
+                                top: 720,
+                                right: 720,
+                                bottom: 720,
+                                left: 720,
+                            },
                         },
                     },
                     children: [
-                        // --- Header and Student Info ---
+                        // Title
                         new Paragraph({
-                            children: [new TextRun({ text: "المقال وتقرير التقييم", bold: true, size: 32, font: "Arial" })],
+                            children: [
+                                new TextRun({
+                                    text: "المقال وتقرير التقييم",
+                                    bold: true,
+                                    size: 32,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.CENTER,
                             spacing: { after: 400 },
                         }),
+                        
+                        // Student info
                         new Paragraph({
-                            children: [new TextRun({ text: `الطالب: ${currentSubmissionData.student_id}`, size: 24, font: "Arial" })],
+                            children: [
+                                new TextRun({
+                                    text: `الطالب: ${currentSubmissionData.student_id}`,
+                                    size: 18,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
                             spacing: { after: 100 },
                         }),
+                        
                         new Paragraph({
-                            children: [new TextRun({ text: `الموضوع: ${currentSubmissionData.weekly_topic}`, size: 24, font: "Arial" })],
+                            children: [
+                                new TextRun({
+                                    text: `الموضوع: ${currentSubmissionData.weekly_topic}`,
+                                    size: 18,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
                             spacing: { after: 400 },
                         }),
-
-                        // --- The Student's Article ---
+                        
+                        // Essay section
                         new Paragraph({
-                            children: [new TextRun({ text: "المقال الأصلي", bold: true, size: 28, font: "Arial" })],
+                            children: [
+                                new TextRun({
+                                    text: "المقال الأصلي",
+                                    bold: true,
+                                    size: 24,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
                             spacing: { after: 200 },
                         }),
-                        new Paragraph({ // The article's title
-                            children: [new TextRun({ text: currentSubmissionData.title, bold: true, size: 26, font: "Arial" })],
+                        
+                        // Essay title
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: currentSubmissionData.title,
+                                    bold: true,
+                                    size: 20,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.CENTER,
-                            bidirectional: true,
                             spacing: { after: 300 },
                         }),
                         
-                        // The article content with justification and RTL, preserving paragraphs
-                        ...currentSubmissionData.article.split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p)),
-
-                        // --- The Evaluation Report ---
+                        // Essay content
                         new Paragraph({
-                            children: [new TextRun({ text: "تقرير التقييم", bold: true, size: 28, font: "Arial" })],
+                            children: [
+                                new TextRun({
+                                    text: currentSubmissionData.article,
+                                    size: 18,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
                             alignment: AlignmentType.RIGHT,
-                            bidirectional: true,
-                            spacing: { before: 400, after: 200 },
+                            spacing: { after: 600, line: 300 },
                         }),
                         
-                        // Summary and Feedback paragraphs are now also justified and RTL
-                        createArabicParagraph(`التقييم العام: ${currentResultData.gemini_rating}/10`, { bold: true, alignment: AlignmentType.RIGHT, size: 22 }),
-                        createArabicParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, alignment: AlignmentType.RIGHT, size: 22 }),
+                        // Evaluation section
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: "تقرير التقييم",
+                                    bold: true,
+                                    size: 24,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 200 },
+                        }),
                         
-                        createArabicParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT }),
-                        ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p, { size: 22 })),
+                        // Metrics
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: `التقييم العام: ${currentResultData.gemini_rating}/10`,
+                                    size: 16,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 100 },
+                        }),
                         
-                        createArabicParagraph("التقييم التفصيلي:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 100 } }),
-                        ... (currentResultData.gemini_feedback || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p, { size: 22 })),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: `عدد الكلمات: ${currentResultData.word_count} | عدد الفقرات: ${currentResultData.paragraph_count}`,
+                                    size: 16,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: `التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`,
+                                    size: 16,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 300 },
+                        }),
+                        
+                        // Summary
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: "ملخص التقييم:",
+                                    bold: true,
+                                    size: 18,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: currentResultData.feedback_summary || 'غير متوفر',
+                                    size: 16,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 300, line: 240 },
+                        }),
+                        
+                        // Detailed feedback
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: "التقييم التفصيلي:",
+                                    bold: true,
+                                    size: 18,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: currentResultData.gemini_feedback || 'غير متوفر',
+                                    size: 16,
+                                    font: "Arial Unicode MS",
+                                }),
+                            ],
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { line: 240 },
+                        }),
                     ],
                 }],
             });
@@ -571,53 +687,76 @@ ${currentResultData.gemini_feedback || 'غير متوفر'}
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // Get form data
             const formData = new FormData(form);
             const studentId = formData.get('student_id');
             const weeklyTopic = formData.get('weekly_topic');
             const title = formData.get('title');
             const article = formData.get('article');
 
+            // Validate student ID
             const studentIdParts = studentId.trim().split(/\s+/);
             if (studentIdParts.length < 3) {
                 showStatus('يجب إدخال الاسم والشعبة والرقم الجامعي كاملة (مثال سلطان المجيول 12353 447123456)', 'error');
                 return;
             }
 
+            // Validate title
             if (!title.trim() || title.trim().length < 5) {
                 showStatus('يجب إدخال عنوان للمقال (الحد الأدنى: 5 أحرف)', 'error');
                 titleInput.focus();
                 return;
             }
 
+            // Count Arabic words and paragraphs
             const arabicWordCount = countArabicWords(article);
             const paragraphCount = countParagraphs(article);
             
+            // Validate word count
             if (arabicWordCount < 150) {
                 showStatus(`لا يمكن إرسال المقال. يحتوي على ${arabicWordCount} كلمة عربية فقط. الحد الأدنى المطلوب: 150 كلمة عربية.`, 'error');
                 articleTextarea.focus();
                 return;
             }
-            
-            // Custom Modal for confirmation instead of window.confirm
+
+            // Validate paragraph structure
             if (paragraphCount < 3) {
-                if (!await showCustomConfirm(`تحذير: المقال يحتوي على ${paragraphCount} فقرات فقط. يُنصح بوجود 3 فقرات (مقدمة، عرض، خاتمة). هل تريد المتابعة؟`)) {
+                showStatus(`تحذير: المقال يحتوي على ${paragraphCount} فقرات فقط. يُنصح بوجود 3 فقرات (مقدمة، عرض، خاتمة). هل تريد المتابعة؟`, 'warning');
+                
+                if (!confirm('المقال لا يحتوي على 3 فقرات منفصلة. هل تريد إرساله للتقييم رغم ذلك؟')) {
                     articleTextarea.focus();
                     return;
                 }
             }
-            
-            currentSubmissionData = { student_id: studentId, weekly_topic: weeklyTopic, title: title, article: article };
 
+            // Store submission data for downloads
+            currentSubmissionData = {
+                student_id: studentId,
+                weekly_topic: weeklyTopic,
+                title: title,
+                article: article
+            };
+
+            // Show loading state
             showStatus('يتم إرسال المقال والحصول على التقييم...', 'loading');
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'تحت التقييم...';
             resultsContainer.classList.add('hidden');
 
+            const data = {
+                student_id: studentId,
+                weekly_topic: weeklyTopic,
+                title: title,
+                article: article
+            };
+
             try {
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentSubmissionData)
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 });
 
                 if (!response.ok) {
@@ -625,6 +764,8 @@ ${currentResultData.gemini_feedback || 'غير متوفر'}
                 }
 
                 const result = await response.json();
+                
+                // Store result data for downloads
                 currentResultData = result;
                 
                 showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
@@ -638,31 +779,6 @@ ${currentResultData.gemini_feedback || 'غير متوفر'}
                 submitBtn.innerHTML = 'إرسال المقال للتقييم';
             }
         });
-
-        // Custom confirm dialog to avoid using browser's confirm()
-        function showCustomConfirm(message) {
-            return new Promise(resolve => {
-                const confirmModal = document.createElement('div');
-                confirmModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
-                confirmModal.innerHTML = `
-                    <div style="background: white; padding: 2rem; border-radius: 1rem; text-align: center; max-width: 400px; font-family: 'Cairo', sans-serif;">
-                        <p style="margin-bottom: 1.5rem; font-size: 1.1rem; color: #333;">${message}</p>
-                        <button id="confirm-yes" style="background: #1f2937; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; margin: 0 0.5rem;">نعم، متابعة</button>
-                        <button id="confirm-no" style="background: #e5e7eb; color: #1f2937; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; margin: 0 0.5rem;">لا، إلغاء</button>
-                    </div>
-                `;
-                document.body.appendChild(confirmModal);
-
-                document.getElementById('confirm-yes').onclick = () => {
-                    document.body.removeChild(confirmModal);
-                    resolve(true);
-                };
-                document.getElementById('confirm-no').onclick = () => {
-                    document.body.removeChild(confirmModal);
-                    resolve(false);
-                };
-            });
-        }
 
         function showStatus(message, type) {
             statusText.textContent = message;
@@ -692,23 +808,67 @@ ${currentResultData.gemini_feedback || 'غير متوفر'}
             statusMessage.classList.remove('hidden');
         }
 
+        // Enhanced feedback formatting
         function formatFeedbackText(text) {
-             if (!text) return 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
-            return text; // The docx formatting handles structure, keep web simple
+            if (!text) return 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
+            
+            let formatted = text
+                .replace(/- /g, '• ')
+                .replace(/\* /g, '• ')
+                .replace(/^(التقييم:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
+                .replace(/^(الملخص:[^\n]*)/gm, '<div class="font-bold text-lg mb-3 text-gray-800">$1</div>')
+                .replace(/^(تقييم العنوان:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-blue-700">$1</div>')
+                .replace(/^(تقييم هيكل المقال:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-green-700">$1</div>')
+                .replace(/^(الأخطاء الإملائية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
+                .replace(/^(الأخطاء النحوية:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-red-700">$1</div>')
+                .replace(/^(نصائح للتحسين:[^\n]*)/gm, '<div class="font-semibold text-base mb-2 text-blue-700">$1</div>')
+                .replace(/^• ([^\n]+)/gm, '<div class="mr-4 mb-2">• $1</div>')
+                .replace(/\n\n/g, '</p><p class="mb-4">')
+                .replace(/^/, '<p class="mb-4">')
+                .replace(/$/, '</p>');
+            
+            return formatted;
         }
 
         function displayResults(data) {
-            document.getElementById('rating').textContent = data.gemini_rating ? `${data.gemini_rating}/10` : 'غير متوفر';
-            document.getElementById('lexicalDiversity').textContent = data.lexical_diversity ? `${parseFloat(data.lexical_diversity).toFixed(1)}%` : 'غير متوفر';
-            document.getElementById('lexicalDensity').textContent = data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
-            document.getElementById('structureCount').textContent = data.paragraph_count ? data.paragraph_count : 'غير متوفر';
+            console.log('Received data:', data);
             
-            document.getElementById('summary').textContent = data.feedback_summary || 'تم استلام المقال وسيتم مراجعته.';
-            document.getElementById('detailedFeedback').innerHTML = (data.gemini_feedback || 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.').replace(/\n/g, '<br>');
-
+            // Update all metrics
+            document.getElementById('rating').textContent = 
+                data.gemini_rating ? `${data.gemini_rating}/10` : 'غير متوفر';
+            
+            document.getElementById('lexicalDiversity').textContent = 
+                data.lexical_diversity ? `${parseFloat(data.lexical_diversity).toFixed(1)}%` : 'غير متوفر';
+            
+            document.getElementById('lexicalDensity').textContent = 
+                data.lexical_density ? `${parseFloat(data.lexical_density).toFixed(1)}%` : 'غير متوفر';
+                
+            document.getElementById('structureCount').textContent = 
+                data.paragraph_count ? data.paragraph_count : 'غير متوفر';
+            
+            // Handle summary
+            let summary = 'تم استلام المقال وسيتم مراجعته';
+            if (data.feedback_summary && typeof data.feedback_summary === 'string') {
+                summary = data.feedback_summary;
+            }
+            document.getElementById('summary').textContent = summary;
+            
+            // Handle feedback
+            let feedback = 'شكراً لإرسال مقالك. سيتم مراجعته قريباً.';
+            if (data.gemini_feedback && typeof data.gemini_feedback === 'string') {
+                feedback = data.gemini_feedback;
+            }
+            
+            const formattedFeedback = formatFeedbackText(feedback);
+            document.getElementById('detailedFeedback').innerHTML = formattedFeedback;
+            
+            // Show results
             resultsContainer.classList.remove('hidden');
             setTimeout(() => {
-                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                resultsContainer.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }, 300);
         }
 
