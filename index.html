@@ -442,13 +442,14 @@
                     ],
                     alignment: options.alignment || AlignmentType.JUSTIFY, // Default to Justify
                     bidirectional: true, // ESSENTIAL for Arabic
-                    spacing: options.spacing || { after: 200, line: 360 }, // Default spacing
+                    spacing: options.spacing || { line: 360 }, // REMOVED default 'after' spacing to reduce space between paragraphs
                 });
             };
 
             const doc = new Document({
                 sections: [{
                     properties: {
+                        rightToLeft: true, // ADDED: Sets the entire document direction to RTL
                         page: {
                             margin: { top: 720, right: 720, bottom: 720, left: 720 },
                         },
@@ -499,10 +500,10 @@
                         }),
                         
                         // Summary and Feedback paragraphs are now also justified and RTL
-                        createArabicParagraph(`التقييم العام: ${currentResultData.gemini_rating}/10`, { bold: true, alignment: AlignmentType.RIGHT, size: 22 }),
-                        createArabicParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, alignment: AlignmentType.RIGHT, size: 22 }),
+                        createArabicParagraph(`التقييم العام: ${currentResultData.gemini_rating}/10`, { bold: true, alignment: AlignmentType.RIGHT, size: 22, spacing: { after: 50 } }),
+                        createArabicParagraph(`التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`, { bold: true, alignment: AlignmentType.RIGHT, size: 22, spacing: { after: 200 } }),
                         
-                        createArabicParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT }),
+                        createArabicParagraph("ملخص التقييم:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, spacing: { after: 100 } }),
                         ... (currentResultData.feedback_summary || 'غير متوفر').split('\n').filter(p => p.trim() !== '').map(p => createArabicParagraph(p, { size: 22 })),
                         
                         createArabicParagraph("التقييم التفصيلي:", { bold: true, size: 24, alignment: AlignmentType.RIGHT, spacing: { before: 200, after: 100 } }),
