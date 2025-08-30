@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الكتابات الأسبوعية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
         
@@ -79,15 +80,6 @@
         
         .paragraph-counter {
             font-weight: 600;
-        }
-        
-        .upload-area {
-            transition: all 0.3s ease;
-        }
-        
-        .upload-area.dragover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
         }
     </style>
 </head>
@@ -321,6 +313,7 @@
 
         // Replace with your actual n8n webhook URL
         const WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
+        const RETRIEVAL_WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/retrieve-essays';
 
         // Store current submission data for downloads
         let currentSubmissionData = null;
@@ -389,97 +382,286 @@
 
         articleTextarea.addEventListener('input', updateCounts);
 
-        // Download both essay and report
-        function downloadBoth() {
+        // Download both essay and report as DOCX
+        async function downloadBoth() {
             if (!currentSubmissionData || !currentResultData) return;
             
             // Download essay first
-            downloadEssay();
+            await downloadEssayDocx();
             
             // Download report after a short delay
-            setTimeout(() => {
-                downloadReport();
+            setTimeout(async () => {
+                await downloadReportDocx();
             }, 500);
         }
 
-        // Download essay as text file
-        function downloadEssay() {
+        // Download essay as DOCX file
+        async function downloadEssayDocx() {
             if (!currentSubmissionData) return;
             
-            const content = `العنوان: ${currentSubmissionData.title}
-
-الطالب: ${currentSubmissionData.student_id}
-الموضوع: ${currentSubmissionData.weekly_topic}
-التاريخ: ${new Date().toLocaleDateString('ar-SA')}
-
-${currentSubmissionData.article}`;
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: currentSubmissionData.title,
+                                    bold: true,
+                                    size: 32,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `الطالب: ${currentSubmissionData.student_id}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `الموضوع: ${currentSubmissionData.weekly_topic}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `التاريخ: ${new Date().toLocaleDateString('ar-SA')}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: currentSubmissionData.article,
+                                    size: 24,
+                                }),
+                            ],
+                        }),
+                    ],
+                }],
+            });
             
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const blob = await docx.Packer.toBlob(doc);
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${currentSubmissionData.title.substring(0, 50)}_مقال.txt`;
+            a.download = `${currentSubmissionData.title.substring(0, 50)}_مقال.docx`;
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        // Download feedback report as HTML file
-        function downloadReport() {
+        // Download feedback report as DOCX file
+        async function downloadReportDocx() {
             if (!currentResultData || !currentSubmissionData) return;
             
-            const reportHTML = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>تقرير التقييم - ${currentSubmissionData.title}</title>
-    <style>
-        body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; line-height: 1.6; }
-        .header { background: #f0f8ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .metric { display: inline-block; margin: 10px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #ddd; }
-        .section { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px 0; border-radius: 5px; }
-        h1 { color: #2c5aa0; }
-        h3 { color: #1a365d; margin-top: 20px; }
-        .original-text { background: #f8f9fa; padding: 15px; border-right: 4px solid #007bff; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>تقرير تقييم الكتابة الأكاديمية</h1>
-        <p><strong>الطالب:</strong> ${currentSubmissionData.student_id}</p>
-        <p><strong>العنوان:</strong> ${currentSubmissionData.title}</p>
-        <p><strong>الموضوع:</strong> ${currentSubmissionData.weekly_topic}</p>
-        <p><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
-    </div>
-    
-    <div class="metrics">
-        <div class="metric"><strong>التقييم العام:</strong> ${currentResultData.gemini_rating}/10</div>
-        <div class="metric"><strong>عدد الكلمات:</strong> ${currentResultData.word_count}</div>
-        <div class="metric"><strong>عدد الفقرات:</strong> ${currentResultData.paragraph_count}</div>
-        <div class="metric"><strong>التنوع المعجمي:</strong> ${currentResultData.lexical_diversity}%</div>
-    </div>
-    
-    <div class="section original-text">
-        <h3>النص الأصلي:</h3>
-        <p style="white-space: pre-wrap;">${currentSubmissionData.article}</p>
-    </div>
-    
-    <div class="section">
-        <h3>ملخص التقييم:</h3>
-        <p>${currentResultData.feedback_summary}</p>
-    </div>
-    
-    <div class="section">
-        <h3>التقييم التفصيلي والنصائح:</h3>
-        <div style="white-space: pre-wrap;">${currentResultData.gemini_feedback}</div>
-    </div>
-</body>
-</html>`;
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        // Title
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "تقرير تقييم الكتابة الأكاديمية",
+                                    bold: true,
+                                    size: 36,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        
+                        // Student info
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `الطالب: ${currentSubmissionData.student_id}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `العنوان: ${currentSubmissionData.title}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `الموضوع: ${currentSubmissionData.weekly_topic}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `التاريخ: ${new Date().toLocaleDateString('ar-SA')}`,
+                                    bold: true,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        
+                        // Metrics
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "المقاييس:",
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `التقييم العام: ${currentResultData.gemini_rating}/10`,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `عدد الكلمات: ${currentResultData.word_count}`,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `عدد الفقرات: ${currentResultData.paragraph_count}`,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `التنوع المعجمي: ${currentResultData.lexical_diversity}%`,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        
+                        // Original text
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "النص الأصلي:",
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: currentSubmissionData.article,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        
+                        // Summary
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "ملخص التقييم:",
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: currentResultData.feedback_summary,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "",
+                                }),
+                            ],
+                        }),
+                        
+                        // Detailed feedback
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "التقييم التفصيلي والنصائح:",
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                        }),
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: currentResultData.gemini_feedback,
+                                }),
+                            ],
+                        }),
+                    ],
+                }],
+            });
             
-            const blob = new Blob([reportHTML], { type: 'text/html;charset=utf-8' });
+            const blob = await docx.Packer.toBlob(doc);
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `تقرير_${currentSubmissionData.title.substring(0, 30)}.html`;
+            a.download = `تقرير_${currentSubmissionData.title.substring(0, 30)}.docx`;
             a.click();
             URL.revokeObjectURL(url);
         }
