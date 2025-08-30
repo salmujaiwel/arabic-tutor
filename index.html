@@ -552,187 +552,306 @@ ${currentResultData.gemini_feedback}`;
             
             const doc = new docx.Document({
                 sections: [{
-                    properties: {},
+                    properties: {
+                        page: {
+                            margin: {
+                                top: 720,
+                                right: 720,
+                                bottom: 720,
+                                left: 720,
+                            },
+                        },
+                    },
                     children: [
-                        // Title
+                        // Main Title
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: "تقرير تقييم الكتابة الأكاديمية",
                                     bold: true,
-                                    size: 36,
+                                    size: 32,
+                                    color: "1f2937",
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "",
-                                }),
-                            ],
+                            bidirectional: true,
+                            spacing: { after: 400 },
                         }),
                         
-                        // Student info
+                        // Separator line
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: `الطالب: ${currentSubmissionData.student_id}`,
-                                    bold: true,
+                                    text: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                                    color: "6b7280",
+                                    size: 16,
                                 }),
                             ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `العنوان: ${currentSubmissionData.title}`,
-                                    bold: true,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `الموضوع: ${currentSubmissionData.weekly_topic}`,
-                                    bold: true,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `التاريخ: ${new Date().toLocaleDateString('ar-SA')}`,
-                                    bold: true,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "",
-                                }),
-                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                            spacing: { after: 300 },
                         }),
                         
-                        // Metrics
+                        // Student Information Section
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: "المقاييس:",
+                                    text: "معلومات الطالب",
                                     bold: true,
-                                    size: 28,
+                                    size: 24,
+                                    color: "1e40af",
                                 }),
                             ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `التقييم العام: ${currentResultData.gemini_rating}/10`,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `عدد الكلمات: ${currentResultData.word_count}`,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `عدد الفقرات: ${currentResultData.paragraph_count}`,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `التنوع المعجمي: ${currentResultData.lexical_diversity}%`,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `الكثافة المعجمية: ${currentResultData.lexical_density}%`,
-                                }),
-                            ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "",
-                                }),
-                            ],
+                            bidirectional: true,
+                            spacing: { after: 200 },
                         }),
                         
-                        // Original text
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: "النص الأصلي:",
+                                    text: "الطالب: ",
                                     bold: true,
-                                    size: 28,
+                                    size: 22,
+                                }),
+                                new docx.TextRun({
+                                    text: currentSubmissionData.student_id,
+                                    size: 22,
                                 }),
                             ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
                         }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "عنوان المقال: ",
+                                    bold: true,
+                                    size: 22,
+                                }),
+                                new docx.TextRun({
+                                    text: currentSubmissionData.title,
+                                    size: 22,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "موضوع الأسبوع: ",
+                                    bold: true,
+                                    size: 22,
+                                }),
+                                new docx.TextRun({
+                                    text: currentSubmissionData.weekly_topic,
+                                    size: 22,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "تاريخ التقييم: ",
+                                    bold: true,
+                                    size: 22,
+                                }),
+                                new docx.TextRun({
+                                    text: new Date().toLocaleDateString('ar-SA'),
+                                    size: 22,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 400 },
+                        }),
+                        
+                        // Metrics Section
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "نتائج التقييم والمقاييس",
+                                    bold: true,
+                                    size: 24,
+                                    color: "16a34a",
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 200 },
+                        }),
+                        
+                        // Metrics table-like structure
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `• التقييم العام: ${currentResultData.gemini_rating}/10`,
+                                    size: 20,
+                                    bold: true,
+                                    color: "dc2626",
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `• عدد الكلمات العربية: ${currentResultData.word_count}`,
+                                    size: 20,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `• عدد الفقرات: ${currentResultData.paragraph_count}`,
+                                    size: 20,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `• التنوع المعجمي: ${currentResultData.lexical_diversity}%`,
+                                    size: 20,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 100 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `• الكثافة المعجمية: ${currentResultData.lexical_density}%`,
+                                    size: 20,
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 400 },
+                        }),
+                        
+                        // Original Text Section
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "النص الأصلي المقدم",
+                                    bold: true,
+                                    size: 24,
+                                    color: "7c3aed",
+                                }),
+                            ],
+                            bidirectional: true,
+                            spacing: { after: 200 },
+                        }),
+                        
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: currentSubmissionData.article,
+                                    size: 20,
+                                    italics: true,
                                 }),
                             ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "",
-                                }),
-                            ],
+                            bidirectional: true,
+                            spacing: { 
+                                before: 200,
+                                after: 400,
+                                line: 360,
+                            },
+                            indent: { left: 400, right: 400 },
                         }),
                         
-                        // Summary
+                        // Summary Section
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: "ملخص التقييم:",
+                                    text: "ملخص التقييم",
                                     bold: true,
-                                    size: 28,
+                                    size: 24,
+                                    color: "ea580c",
                                 }),
                             ],
+                            bidirectional: true,
+                            spacing: { after: 200 },
                         }),
+                        
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: currentResultData.feedback_summary,
+                                    size: 20,
                                 }),
                             ],
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "",
-                                }),
-                            ],
+                            bidirectional: true,
+                            spacing: { 
+                                after: 400,
+                                line: 360,
+                            },
                         }),
                         
-                        // Detailed feedback
+                        // Detailed Feedback Section
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
-                                    text: "التقييم التفصيلي والنصائح:",
+                                    text: "التقييم التفصيلي والنصائح",
                                     bold: true,
-                                    size: 28,
+                                    size: 24,
+                                    color: "be185d",
                                 }),
                             ],
+                            bidirectional: true,
+                            spacing: { after: 200 },
                         }),
+                        
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: currentResultData.gemini_feedback,
+                                    size: 20,
                                 }),
                             ],
+                            bidirectional: true,
+                            spacing: { 
+                                after: 300,
+                                line: 360,
+                            },
+                        }),
+                        
+                        // Footer
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                                    color: "6b7280",
+                                    size: 16,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                            spacing: { before: 400, after: 200 },
+                        }),
+                        
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "تم إنشاء هذا التقرير بواسطة نظام التقييم الآلي للكتابة العربية",
+                                    size: 16,
+                                    color: "6b7280",
+                                    italics: true,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                            bidirectional: true,
                         }),
                     ],
                 }],
