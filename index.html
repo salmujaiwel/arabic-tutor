@@ -416,10 +416,24 @@
                     return text.replace(/^\*+\s*/, '• ').trim();
                 }
 
+                // DIRECT COLON REMOVAL - Fix the specific problem headers
+                function removeColonsFromHeaders(text) {
+                    return text
+                        .replace('ملخص التقييم:', 'ملخص التقييم')
+                        .replace('التقييم التفصيلي:', 'التقييم التفصيلي')
+                        .replace('تقييم العنوان:', 'تقييم العنوان')
+                        .replace('تقييم هيكل المقال:', 'تقييم هيكل المقال')
+                        .replace('الأخطاء الإملائية:', 'الأخطاء الإملائية')
+                        .replace('الأخطاء النحوية:', 'الأخطاء النحوية')
+                        .replace('نصائح للتحسين:', 'نصائح للتحسين')
+                        .replace('الطالب:', 'الطالب')
+                        .replace(/[:.]/g, '');
+                }
+
                 // Helper function to create Arabic paragraph with consistent RTL settings
                 function createArabicParagraph(text, isBold = false, isHeader = false, isBullet = false) {
-                    // Clean ALL text, regardless of type
-                    const cleanedText = cleanAllText(text);
+                    // Clean ALL text AND remove specific problematic colons
+                    const cleanedText = removeColonsFromHeaders(cleanAllText(text));
                     
                     const spacing = isHeader ? { after: 120 } : (isBullet ? { after: 80 } : { after: 100 });
                     const indent = isBullet ? { left: 400 } : {};
