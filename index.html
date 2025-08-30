@@ -401,6 +401,160 @@
             });
         }
 
+        // ENHANCED DOCX CREATION WITH COLON REMOVAL
+        async function createEnhancedDocx() {
+            const { Document, Packer } = docx;
+            
+            try {
+                // Helper function to clean ALL text (remove colons and periods from any text)
+                function cleanAllText(text) {
+                    return text.replace(/[:.]/g, '').trim();
+                }
+
+                // Helper function to process bullet text
+                function processBulletText(text) {
+                    return text.replace(/^\*+\s*/, '• ').trim();
+                }
+
+                // Helper function to create Arabic paragraph with consistent RTL settings
+                function createArabicParagraph(text, isBold = false, isHeader = false, isBullet = false) {
+                    // Clean ALL text, regardless of type
+                    const cleanedText = cleanAllText(text);
+                    
+                    const spacing = isHeader ? { after: 120 } : (isBullet ? { after: 80 } : { after: 100 });
+                    const indent = isBullet ? { left: 400 } : {};
+                    
+                    return new docx.Paragraph({
+                        children: [
+                            new docx.TextRun({
+                                text: cleanedText,
+                                bold: isBold || isHeader,
+                                font: { name: "Arial" },
+                                size: isHeader ? 24 : 22,
+                                rightToLeft: true
+                            })
+                        ],
+                        alignment: docx.AlignmentType.RIGHT,
+                        spacing: spacing,
+                        indent: indent,
+                        bidirectional: true
+                    });
+                }
+
+                // Process all text content
+                const studentInfo = currentSubmissionData.student_id;
+                const topicInfo = currentSubmissionData.weekly_topic;
+                const essayTitle = currentSubmissionData.title;
+                const essayContent = currentSubmissionData.article;
+                
+                // Process feedback content line by line
+                const feedbackText = currentResultData.gemini_feedback || 'غير متوفر';
+                const summaryText = currentResultData.feedback_summary || 'غير متوفر';
+                
+                // Split feedback into lines and process each
+                const feedbackLines = feedbackText.split('\n').filter(line => line.trim());
+                const summaryLines = summaryText.split('\n').filter(line => line.trim());
+                
+                const children = [
+                    // Title
+                    createArabicParagraph("المقال وتقرير التقييم", true, true),
+                    
+                    // Student info
+                    createArabicParagraph(`الطالب ${cleanAllText(studentInfo)}`),
+                    createArabicParagraph(`الموضوع ${cleanAllText(topicInfo)}`),
+                    
+                    // Add some spacing
+                    new docx.Paragraph({ children: [], spacing: { after: 400 } }),
+                    
+                    // Essay section header
+                    createArabicParagraph("المقال الأصلي", true, true),
+                    
+                    // Essay title
+                    createArabicParagraph(essayTitle, true),
+                    
+                    // Essay content
+                    createArabicParagraph(essayContent),
+                    
+                    // Add spacing before evaluation
+                    new docx.Paragraph({ children: [], spacing: { after: 400 } }),
+                    
+                    // Evaluation header
+                    createArabicParagraph("تقرير التقييم", true, true),
+                    
+                    // Metrics
+                    createArabicParagraph(`التقييم العام ${currentResultData.gemini_rating}/10`),
+                    createArabicParagraph(`عدد الكلمات ${currentResultData.word_count} | عدد الفقرات ${currentResultData.paragraph_count}`),
+                    createArabicParagraph(`التنوع المعجمي ${currentResultData.lexical_diversity}% | الكثافة المعجمية ${currentResultData.lexical_density}%`),
+                    
+                    // Summary header and content
+                    createArabicParagraph("ملخص التقييم", true, true)
+                ];
+                
+                // Add summary lines
+                summaryLines.forEach(line => {
+                    if (line.trim()) {
+                        if (line.startsWith('*') || line.startsWith('-')) {
+                            children.push(createArabicParagraph(processBulletText(line), false, false, true));
+                        } else if (line.includes(':') || line.length < 50) {
+                            children.push(createArabicParagraph(line, true));
+                        } else {
+                            children.push(createArabicParagraph(line));
+                        }
+                    }
+                });
+                
+                // Detailed feedback header
+                children.push(createArabicParagraph("التقييم التفصيلي", true, true));
+                
+                // Add feedback lines
+                feedbackLines.forEach(line => {
+                    if (line.trim()) {
+                        if (line.startsWith('*') || line.startsWith('-')) {
+                            children.push(createArabicParagraph(processBulletText(line), false, false, true));
+                        } else if (line.includes(':') || line.length < 50) {
+                            children.push(createArabicParagraph(line, true));
+                        } else {
+                            children.push(createArabicParagraph(line));
+                        }
+                    }
+                });
+
+                const doc = new Document({
+                    sections: [{
+                        properties: {
+                            page: {
+                                margin: { top: 720, right: 720, bottom: 720, left: 720 }
+                            }
+                        },
+                        children: children
+                    }],
+                    styles: {
+                        default: {
+                            document: {
+                                run: {
+                                    font: "Arial",
+                                    size: 22,
+                                    rightToLeft: true
+                                },
+                                paragraph: {
+                                    alignment: docx.AlignmentType.RIGHT,
+                                    bidirectional: true
+                                }
+                            }
+                        }
+                    }
+                });
+
+                const blob = await Packer.toBlob(doc);
+                downloadFile(blob, 'المقال_والتقرير_نظيف.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                
+            } catch (error) {
+                console.error('حدث خطأ أثناء إنشاء المستند:', error);
+                alert('حدث خطأ أثناء إنشاء المستند. سيتم إنشاء ملف نصي بدلاً من ذلك.');
+                createTextFile();
+            }
+        }
+
         // THE ONLY DOWNLOAD FUNCTION - Creates ONE file with both essay and report
         async function downloadSingleFile() {
             if (!currentSubmissionData || !currentResultData) {
@@ -414,7 +568,7 @@
 
             try {
                 await loadDocxLibrary();
-                await createCombinedDocument();
+                await createEnhancedDocx();
             } catch (error) {
                 console.error('Error creating document:', error);
                 createTextFile(); // Fallback to text file
@@ -422,213 +576,6 @@
                 downloadBtn.disabled = false;
                 downloadBtn.textContent = 'تحميل المقال والتقرير';
             }
-        }
-
-        // Create combined DOCX document with improved RTL support
-        async function createCombinedDocument() {
-            const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
-            
-            const doc = new Document({
-                sections: [{
-                    properties: {
-                        page: {
-                            margin: {
-                                top: 720,
-                                right: 720,
-                                bottom: 720,
-                                left: 720,
-                            },
-                        },
-                    },
-                    children: [
-                        // Title
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "المقال وتقرير التقييم",
-                                    bold: true,
-                                    size: 32,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 },
-                        }),
-                        
-                        // Student info
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `الطالب: ${currentSubmissionData.student_id}`,
-                                    size: 18,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 100 },
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `الموضوع: ${currentSubmissionData.weekly_topic}`,
-                                    size: 18,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 400 },
-                        }),
-                        
-                        // Essay section
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "المقال الأصلي",
-                                    bold: true,
-                                    size: 24,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 200 },
-                        }),
-                        
-                        // Essay title
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: currentSubmissionData.title,
-                                    bold: true,
-                                    size: 20,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 },
-                        }),
-                        
-                        // Essay content
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: currentSubmissionData.article,
-                                    size: 18,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 600, line: 300 },
-                        }),
-                        
-                        // Evaluation section
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "تقرير التقييم",
-                                    bold: true,
-                                    size: 24,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 200 },
-                        }),
-                        
-                        // Metrics
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `التقييم العام: ${currentResultData.gemini_rating}/10`,
-                                    size: 16,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 100 },
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `عدد الكلمات: ${currentResultData.word_count} | عدد الفقرات: ${currentResultData.paragraph_count}`,
-                                    size: 16,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 100 },
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`,
-                                    size: 16,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 300 },
-                        }),
-                        
-                        // Summary
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "ملخص التقييم:",
-                                    bold: true,
-                                    size: 18,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 100 },
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: currentResultData.feedback_summary || 'غير متوفر',
-                                    size: 16,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 300, line: 240 },
-                        }),
-                        
-                        // Detailed feedback
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "التقييم التفصيلي:",
-                                    bold: true,
-                                    size: 18,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { after: 100 },
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: currentResultData.gemini_feedback || 'غير متوفر',
-                                    size: 16,
-                                    font: "Arial Unicode MS",
-                                }),
-                            ],
-                            alignment: AlignmentType.RIGHT,
-                            spacing: { line: 240 },
-                        }),
-                    ],
-                }],
-            });
-
-            const blob = await Packer.toBlob(doc);
-            downloadFile(blob, 'المقال_والتقرير.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         }
 
         // Fallback text file creation
