@@ -289,7 +289,7 @@
                 <div class="text-center mt-6">
                     <button 
                         onclick="downloadBoth()" 
-                        class="bg-gray-900 text-white px-8 py-3 rounded-xl hover:bg-black transition-colors font-semibold text-lg"
+                        class="bg-black text-white px-8 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold text-lg"
                     >
                         تحميل المقال والتقرير
                     </button>
@@ -953,7 +953,7 @@ ${currentResultData.gemini_feedback}`;
 
         // Form submission with enhanced validation
         form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+            e.preventDefault(); // This prevents the URL change issue
 
             // Get form data
             const formData = new FormData(form);
@@ -961,6 +961,8 @@ ${currentResultData.gemini_feedback}`;
             const weeklyTopic = formData.get('weekly_topic');
             const title = formData.get('title');
             const article = formData.get('article');
+
+            console.log('Form submitted with:', { studentId, weeklyTopic, title, article: article.substring(0, 100) + '...' });
 
             // Validate student ID
             const studentIdParts = studentId.trim().split(/\s+/);
@@ -1019,6 +1021,9 @@ ${currentResultData.gemini_feedback}`;
             };
 
             try {
+                console.log('Sending to:', WEBHOOK_URL);
+                console.log('Data:', data);
+                
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
@@ -1027,11 +1032,14 @@ ${currentResultData.gemini_feedback}`;
                     body: JSON.stringify(data)
                 });
 
+                console.log('Response status:', response.status);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
+                console.log('Result:', result);
                 
                 // Store result data for downloads
                 currentResultData = result;
