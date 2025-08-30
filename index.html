@@ -285,10 +285,10 @@
                     <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
                 </div>
 
-                <!-- Download Buttons -->
+                <!-- Download Button -->
                 <div class="text-center mt-6">
                     <button 
-                        onclick="downloadBoth()" 
+                        onclick="downloadCombinedReport()" 
                         class="bg-black text-white px-8 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold text-lg"
                     >
                         تحميل المقال والتقرير
@@ -317,6 +317,7 @@
         // Store current submission data for downloads
         let currentSubmissionData = null;
         let currentResultData = null;
+        let isDocxLibraryLoaded = false;
 
         // Enhanced Arabic word counting function
         function countArabicWords(text) {
@@ -333,7 +334,7 @@
             return words.length;
         }
 
-        // Enhanced paragraph counting function - UPDATED FOR SINGLE LINE BREAKS
+        // Enhanced paragraph counting function
         function countParagraphs(text) {
             if (!text || typeof text !== 'string') return 0;
             
@@ -381,39 +382,47 @@
 
         articleTextarea.addEventListener('input', updateCounts);
 
-        // Load docx library dynamically
+        // Load docx library once
         function loadDocxLibrary() {
             return new Promise((resolve, reject) => {
+                if (isDocxLibraryLoaded && typeof docx !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
                 const script = document.createElement('script');
                 script.src = 'https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js';
-                script.onload = () => resolve();
-                script.onerror = () => reject();
+                script.onload = () => {
+                    isDocxLibraryLoaded = true;
+                    resolve();
+                };
+                script.onerror = () => reject(new Error('Failed to load docx library'));
                 document.head.appendChild(script);
             });
         }
 
-        // Download single combined DOCX file
-        async function downloadBoth() {
-            if (!currentSubmissionData || !currentResultData) return;
+        // Single download function - renamed to avoid conflicts
+        async function downloadCombinedReport() {
+            if (!currentSubmissionData || !currentResultData) {
+                alert('لا توجد بيانات للتحميل. تأكد من إرسال المقال أولاً.');
+                return;
+            }
             
             try {
-                if (typeof docx === 'undefined') {
-                    await loadDocxLibrary();
-                }
-                await downloadCombinedDocx();
+                await loadDocxLibrary();
+                await createAndDownloadDocx();
             } catch (error) {
-                alert('مكتبة إنشاء ملفات Word غير متوفرة. سيتم تحميل الملفات كنصوص بدلاً من ذلك.');
-                downloadBothAsText();
+                console.error('Error creating DOCX:', error);
+                alert('حدث خطأ في إنشاء ملف Word. سيتم تحميل نسخة نصية بدلاً من ذلك.');
+                downloadAsTextFile();
             }
         }
 
-        // Download combined essay and report as single DOCX file
-        async function downloadCombinedDocx() {
-            if (!currentResultData || !currentSubmissionData) return;
-            
+        // Create and download single DOCX file with proper RTL support
+        async function createAndDownloadDocx() {
             const doc = new docx.Document({
                 creator: "نظام التقييم الآلي للكتابة العربية",
-                title: `تقرير تقييم - ${currentSubmissionData.title}`,
+                title: `المقال والتقرير - ${currentSubmissionData.title}`,
                 description: `تقرير تقييم الكتابة الأكاديمية للطالب ${currentSubmissionData.student_id}`,
                 sections: [{
                     properties: {
@@ -425,7 +434,6 @@
                                 left: 720,
                             },
                         },
-                        bidi: true,
                     },
                     children: [
                         // Main Title
@@ -436,10 +444,12 @@
                                     bold: true,
                                     size: 36,
                                     color: "1f2937",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
                             spacing: { after: 400 },
+                            bidirectional: true,
                         }),
                         
                         // Student Information
@@ -450,10 +460,25 @@
                                     bold: true,
                                     size: 20,
                                     color: "6b7280",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
                             spacing: { after: 600 },
+                            bidirectional: true,
+                        }),
+                        
+                        // Separator
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                                    color: "e5e7eb",
+                                    size: 16,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                            spacing: { after: 400 },
                         }),
                         
                         // ========== ESSAY SECTION ==========
@@ -464,10 +489,12 @@
                                     bold: true,
                                     size: 28,
                                     color: "1e40af",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 300 },
+                            bidirectional: true,
                         }),
                         
                         // Essay Title
@@ -478,10 +505,12 @@
                                     bold: true,
                                     size: 24,
                                     color: "000000",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
                             spacing: { after: 400 },
+                            bidirectional: true,
                         }),
                         
                         // Essay Content
@@ -490,14 +519,29 @@
                                 new docx.TextRun({
                                     text: currentSubmissionData.article,
                                     size: 22,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { 
                                 after: 800,
-                                line: 360,
+                                line: 400,
                             },
                             indent: { left: 400, right: 400 },
+                            bidirectional: true,
+                        }),
+                        
+                        // Separator
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                                    color: "e5e7eb",
+                                    size: 16,
+                                }),
+                            ],
+                            alignment: docx.AlignmentType.CENTER,
+                            spacing: { after: 400 },
                         }),
                         
                         // ========== EVALUATION SECTION ==========
@@ -508,13 +552,15 @@
                                     bold: true,
                                     size: 28,
                                     color: "dc2626",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 300 },
+                            bidirectional: true,
                         }),
                         
-                        // Metrics
+                        // Metrics Header
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
@@ -522,32 +568,40 @@
                                     bold: true,
                                     size: 22,
                                     color: "16a34a",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 200 },
+                            bidirectional: true,
                         }),
                         
+                        // Metrics Line 1
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: `التقييم العام: ${currentResultData.gemini_rating}/10 | عدد الكلمات: ${currentResultData.word_count} | عدد الفقرات: ${currentResultData.paragraph_count}`,
                                     size: 20,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 100 },
+                            bidirectional: true,
                         }),
                         
+                        // Metrics Line 2
                         new docx.Paragraph({
                             children: [
                                 new docx.TextRun({
                                     text: `التنوع المعجمي: ${currentResultData.lexical_diversity}% | الكثافة المعجمية: ${currentResultData.lexical_density}%`,
                                     size: 20,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 400 },
+                            bidirectional: true,
                         }),
                         
                         // Summary Section
@@ -558,10 +612,12 @@
                                     bold: true,
                                     size: 22,
                                     color: "ea580c",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 200 },
+                            bidirectional: true,
                         }),
                         
                         new docx.Paragraph({
@@ -569,6 +625,7 @@
                                 new docx.TextRun({
                                     text: currentResultData.feedback_summary,
                                     size: 20,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -576,6 +633,7 @@
                                 after: 400,
                                 line: 360,
                             },
+                            bidirectional: true,
                         }),
                         
                         // Detailed Feedback Section
@@ -586,10 +644,12 @@
                                     bold: true,
                                     size: 22,
                                     color: "be185d",
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
                             spacing: { after: 200 },
+                            bidirectional: true,
                         }),
                         
                         new docx.Paragraph({
@@ -597,6 +657,7 @@
                                 new docx.TextRun({
                                     text: currentResultData.gemini_feedback,
                                     size: 20,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.RIGHT,
@@ -604,6 +665,7 @@
                                 after: 300,
                                 line: 360,
                             },
+                            bidirectional: true,
                         }),
                         
                         // Footer
@@ -626,9 +688,11 @@
                                     size: 16,
                                     color: "6b7280",
                                     italics: true,
+                                    rightToLeft: true,
                                 }),
                             ],
                             alignment: docx.AlignmentType.CENTER,
+                            bidirectional: true,
                         }),
                     ],
                 }],
@@ -637,36 +701,49 @@
                         document: {
                             run: {
                                 font: "Arial Unicode MS",
+                                rightToLeft: true,
                             },
                             paragraph: {
                                 spacing: {
                                     line: 240,
                                 },
+                                rightToLeft: true,
                             },
                         },
                     },
                 },
             });
             
-            const blob = await docx.Packer.toBlob(doc);
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${currentSubmissionData.title.substring(0, 30)}_المقال_والتقرير.docx`;
-            a.click();
-            URL.revokeObjectURL(url);
+            try {
+                const blob = await docx.Packer.toBlob(doc);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `المقال_والتقرير_${currentSubmissionData.title.substring(0, 30).replace(/[^\w\u0600-\u06FF]/g, '_')}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error creating blob:', error);
+                throw error;
+            }
         }
 
-        // Fallback: Download as text files
-        function downloadBothAsText() {
+        // Fallback: Download as text file
+        function downloadAsTextFile() {
             const content = `المقال وتقرير التقييم
 الطالب: ${currentSubmissionData.student_id}
 العنوان: ${currentSubmissionData.title}
 الموضوع: ${currentSubmissionData.weekly_topic}
 التاريخ: ${new Date().toLocaleDateString('ar-SA')}
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 === المقال الأصلي ===
 ${currentSubmissionData.article}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 === تقرير التقييم ===
 التقييم العام: ${currentResultData.gemini_rating}/10
@@ -679,14 +756,19 @@ ${currentSubmissionData.article}
 ${currentResultData.feedback_summary}
 
 التقييم التفصيلي والنصائح:
-${currentResultData.gemini_feedback}`;
+${currentResultData.gemini_feedback}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+تم إنشاء هذا التقرير بواسطة نظام التقييم الآلي للكتابة العربية`;
             
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${currentSubmissionData.title.substring(0, 30)}_المقال_والتقرير.txt`;
+            a.download = `المقال_والتقرير_${currentSubmissionData.title.substring(0, 30).replace(/[^\w\u0600-\u06FF]/g, '_')}.txt`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
