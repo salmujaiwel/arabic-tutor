@@ -80,6 +80,15 @@
         .paragraph-counter {
             font-weight: 600;
         }
+        
+        .upload-area {
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
     </style>
 </head>
 <body class="min-h-screen py-8">
@@ -183,7 +192,7 @@
                         maxlength="100"
                     />
                     <div class="mt-2 text-sm text-gray-600">
-                        💡 تنبيه: اجعل العنوان واضحاً وجذاباً ويعبر عن محتوى مقالك
+                        تنبيه: اجعل العنوان واضحاً وجذاباً ويعبر عن محتوى مقالك
                     </div>
                 </div>
 
@@ -218,7 +227,7 @@
                         </div>
                     </div>
                     <div class="mt-3 text-sm text-gray-600">
-                        📋 <strong>تذكير:</strong> يجب أن يحتوي المقال على ثلاث فقرات منفصلة: مقدمة وعرض وخاتمة
+                        <strong>تذكير:</strong> يجب أن يحتوي المقال على ثلاث فقرات منفصلة: مقدمة وعرض وخاتمة
                     </div>
                 </div>
 
@@ -272,7 +281,7 @@
                 <!-- Summary Section -->
                 <div class="bg-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
                     <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
-                        💬 ملخص التقييم
+                        ملخص التقييم
                     </h3>
                     <p id="summary" class="text-gray-700 text-lg leading-relaxed"></p>
                 </div>
@@ -283,6 +292,16 @@
                         التقييم التفصيلي والنصائح
                     </h3>
                     <div id="detailedFeedback" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+                </div>
+
+                <!-- Download Buttons -->
+                <div class="text-center mt-6">
+                    <button 
+                        onclick="downloadBoth()" 
+                        class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 transition-colors font-semibold text-lg"
+                    >
+                        تحميل المقال والتقرير
+                    </button>
                 </div>
             </div>
         </div>
@@ -301,21 +320,21 @@
         const resultsContainer = document.getElementById('resultsContainer');
 
         // Replace with your actual n8n webhook URL
-        // const WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
-		const RETRIEVAL_WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/retrieve-essays';
+        const WEBHOOK_URL = 'https://salmujaiwel.app.n8n.cloud/webhook/writing-feedback';
+
+        // Store current submission data for downloads
+        let currentSubmissionData = null;
+        let currentResultData = null;
 
         // Enhanced Arabic word counting function
         function countArabicWords(text) {
             if (!text || typeof text !== 'string') return 0;
             
-            // More precise Arabic word detection
             const words = text
                 .trim()
                 .split(/\s+/)
                 .filter(word => {
-                    // Remove punctuation from word
                     const cleanWord = word.replace(/[.,!?;:()""''«»\-\u060C\u061B\u061F]/g, '');
-                    // Check if word contains Arabic letters (main Arabic block)
                     return cleanWord.length > 0 && /[\u0600-\u06FF]/.test(cleanWord);
                 });
             
@@ -326,11 +345,10 @@
         function countParagraphs(text) {
             if (!text || typeof text !== 'string') return 0;
             
-            // Split by single line breaks
             const paragraphs = text
                 .split(/\n/)
                 .map(p => p.trim())
-                .filter(p => p.length > 20); // Only count substantial paragraphs
+                .filter(p => p.length > 20);
             
             return paragraphs.length;
         }
@@ -370,6 +388,101 @@
         }
 
         articleTextarea.addEventListener('input', updateCounts);
+
+        // Download both essay and report
+        function downloadBoth() {
+            if (!currentSubmissionData || !currentResultData) return;
+            
+            // Download essay first
+            downloadEssay();
+            
+            // Download report after a short delay
+            setTimeout(() => {
+                downloadReport();
+            }, 500);
+        }
+
+        // Download essay as text file
+        function downloadEssay() {
+            if (!currentSubmissionData) return;
+            
+            const content = `العنوان: ${currentSubmissionData.title}
+
+الطالب: ${currentSubmissionData.student_id}
+الموضوع: ${currentSubmissionData.weekly_topic}
+التاريخ: ${new Date().toLocaleDateString('ar-SA')}
+
+${currentSubmissionData.article}`;
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentSubmissionData.title.substring(0, 50)}_مقال.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Download feedback report as HTML file
+        function downloadReport() {
+            if (!currentResultData || !currentSubmissionData) return;
+            
+            const reportHTML = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير التقييم - ${currentSubmissionData.title}</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; line-height: 1.6; }
+        .header { background: #f0f8ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .metric { display: inline-block; margin: 10px; padding: 15px; background: #f9f9f9; border-radius: 5px; border: 1px solid #ddd; }
+        .section { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px 0; border-radius: 5px; }
+        h1 { color: #2c5aa0; }
+        h3 { color: #1a365d; margin-top: 20px; }
+        .original-text { background: #f8f9fa; padding: 15px; border-right: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>تقرير تقييم الكتابة الأكاديمية</h1>
+        <p><strong>الطالب:</strong> ${currentSubmissionData.student_id}</p>
+        <p><strong>العنوان:</strong> ${currentSubmissionData.title}</p>
+        <p><strong>الموضوع:</strong> ${currentSubmissionData.weekly_topic}</p>
+        <p><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
+    </div>
+    
+    <div class="metrics">
+        <div class="metric"><strong>التقييم العام:</strong> ${currentResultData.gemini_rating}/10</div>
+        <div class="metric"><strong>عدد الكلمات:</strong> ${currentResultData.word_count}</div>
+        <div class="metric"><strong>عدد الفقرات:</strong> ${currentResultData.paragraph_count}</div>
+        <div class="metric"><strong>التنوع المعجمي:</strong> ${currentResultData.lexical_diversity}%</div>
+    </div>
+    
+    <div class="section original-text">
+        <h3>النص الأصلي:</h3>
+        <p style="white-space: pre-wrap;">${currentSubmissionData.article}</p>
+    </div>
+    
+    <div class="section">
+        <h3>ملخص التقييم:</h3>
+        <p>${currentResultData.feedback_summary}</p>
+    </div>
+    
+    <div class="section">
+        <h3>التقييم التفصيلي والنصائح:</h3>
+        <div style="white-space: pre-wrap;">${currentResultData.gemini_feedback}</div>
+    </div>
+</body>
+</html>`;
+            
+            const blob = new Blob([reportHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `تقرير_${currentSubmissionData.title.substring(0, 30)}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
         // Form submission with enhanced validation
         form.addEventListener('submit', async function(e) {
@@ -417,8 +530,16 @@
                 }
             }
 
+            // Store submission data for downloads
+            currentSubmissionData = {
+                student_id: studentId,
+                weekly_topic: weeklyTopic,
+                title: title,
+                article: article
+            };
+
             // Show loading state
-            showStatus('🔄 يتم إرسال المقال والحصول على التقييم...', 'loading');
+            showStatus('يتم إرسال المقال والحصول على التقييم...', 'loading');
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'تحت التقييم...';
             resultsContainer.classList.add('hidden');
@@ -444,6 +565,9 @@
                 }
 
                 const result = await response.json();
+                
+                // Store result data for downloads
+                currentResultData = result;
                 
                 showStatus('تم استلام التقييم بنجاح! راجع النتائج أدناه', 'success');
                 displayResults(result);
@@ -508,7 +632,7 @@
         }
 
         function displayResults(data) {
-            console.log('🔍 Received data:', data);
+            console.log('Received data:', data);
             
             // Update all metrics
             document.getElementById('rating').textContent = 
